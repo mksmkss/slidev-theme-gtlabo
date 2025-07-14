@@ -1,0 +1,65 @@
+{
+  "name": "@mksmkss/slidev-theme-gtlabo",
+  "version": "1.0.0",
+  "description": "A Slidev theme for laboratory presentations with customizable components",
+  "author": "mksmkss",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "index.js",
+  "files": [
+    "components",
+    "layouts", 
+    "styles",
+    "setup",
+    "uno.config.ts",
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mksmkss/slidev-theme-gtlabo.git"
+  },
+  "homepage": "https://github.com/mksmkss/slidev-theme-gtlabo",
+  "bugs": {
+    "url": "https://github.com/mksmkss/slidev-theme-gtlabo/issues"
+  },
+  "keywords": [
+    "slidev-theme",
+    "slidev",
+    "presentation",
+    "laboratory",
+    "vue"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "slidev build example.md",
+    "dev": "slidev example.md --open",
+    "export": "slidev export example.md",
+    "screenshot": "slidev export example.md --format png"
+  },
+  "dependencies": {
+    "@slidev/types": "^51.8.2",
+    "vue": "^3.3.0"
+  },
+  "devDependencies": {
+    "@slidev/cli": "^51.8.2",
+    "typescript": "^5.0.0",
+    "unocss": "^66.2.3"
+  },
+  "//": "Learn more: https://sli.dev/guide/write-theme.html",
+  "slidev": {
+    "colorSchema": "light",
+    "defaults": {
+      "fonts": {
+        "sans": "Nunito Sans",
+        "mono": "Fira Code"
+      },
+      "aspectRatio": "4/3"
+    }
+  }
+}

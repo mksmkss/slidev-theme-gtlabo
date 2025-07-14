@@ -1,19 +1,19 @@
 # Slidev Theme GTlabo
 
-[![NPM version](https://img.shields.io/npm/v/@mksmkss/slidev-theme-gtlabo?color=3AB9D4&label=)](https://www.npmjs.com/package/@mksmkss/slidev-theme-gtlabo)
+[![NPM version](https://img.shields.io/npm/v/slidev-theme-gtlabo?color=3AB9D4&label=)](https://www.npmjs.com/package/slidev-theme-gtlabo)
 
 学術発表やプレゼンテーション用に設計されたSlidev用カスタムテーマ。引用管理、数式表示、階層リストなどの機能を提供します。
 
 ## Install
 
 ```bash
-npm install @mksmkss/slidev-theme-gtlabo
+npm install slidev-theme-gtlabo
 ```
 Add the following frontmatter to your `slides.md`. Start Slidev then it will prompt you to install the theme automatically.
 
 <pre><code>
 ---
-theme: <b>gtlabo</b>
+theme: <b>slidev-theme-gtlabo</b>
 ---
 </code></pre>
 
@@ -188,6 +188,11 @@ This theme provides the following layouts:
 - 内側の円：構造化データの詳細分類
 - 自動アニメーション効果
 - 完全にカスタマイズ可能なSVG
+
+### 8. bib2slidev
+`bib2slidev`は、BibTeX形式の参考文献をSlidev用の引用形式に変換するツールです。
+Pythonで実装されています。
+`dev/bib2slidev.ipynb`を参照してください。
 
 ## 🛠️ 設定方法
 

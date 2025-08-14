@@ -5,21 +5,17 @@
       [{{ citationNumber }}]
     </sup>
     
-    <!-- 引用情報表示エリア（画面下部に常時表示） -->
+    <!-- 指定されたidの引用情報のみ表示（画面下部に表示） -->
     <div 
-      v-if="hasCurrentPageCitations"
+      v-if="citationData && shouldShowCitation"
       class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-300 shadow-lg z-40 max-h-32 overflow-y-auto"
       style="pointer-events: none;"
     >
       <div class="max-w-7xl mx-auto px-4 py-2">
         <div class="space-y-1">
-          <div 
-            v-for="citation in sortedCurrentPageCitations" 
-            :key="citation.id"
-            class="text-xs text-gray-800"
-          >
-            <span class="font-semibold">[{{ citation.number }}]</span>
-            {{ citation.formatted }}
+          <div class="text-xs text-gray-800">
+            <span class="font-semibold">[{{ citationNumber }}]</span>
+            {{ formattedCitation }}
           </div>
         </div>
       </div>
@@ -46,12 +42,13 @@ if (!window.citationManager) {
   window.citationManager = {
     counter: 1,
     citations: new Map(), // id -> { number, data, formatted }
-    pageActiveCitations: new Map(), // pageNumber -> Set(citationIds)
+    activeCitation: null, // 現在表示中の引用id
     components: new Set()
   }
 }
 
 const forceUpdate = ref(0)
+const isVisible = ref(false)
 
 // 現在のページ番号を取得
 const currentPage = computed(() => {
@@ -79,27 +76,21 @@ const citationNumber = computed(() => {
   return window.citationManager.citations.get(props.id).number
 })
 
-// 現在のページにアクティブな引用があるかチェック
-const hasCurrentPageCitations = computed(() => {
-  forceUpdate.value // 依存関係を強制的に更新
-  const pageSet = window.citationManager.pageActiveCitations.get(currentPage.value)
-  return pageSet && pageSet.size > 0
+// フォーマットされた引用情報
+const formattedCitation = computed(() => {
+  if (!citationData.value) return '引用情報が見つかりません'
+  
+  if (window.citationManager.citations.has(props.id)) {
+    return window.citationManager.citations.get(props.id).formatted
+  }
+  
+  return formatCitation(citationData.value)
 })
 
-// 現在のページのソートされた引用一覧
-const sortedCurrentPageCitations = computed(() => {
+// この引用を表示すべきかどうか
+const shouldShowCitation = computed(() => {
   forceUpdate.value // 依存関係を強制的に更新
-  const pageSet = window.citationManager.pageActiveCitations.get(currentPage.value)
-  
-  if (!pageSet) return []
-  
-  return Array.from(pageSet)
-    .map(id => ({
-      id,
-      ...window.citationManager.citations.get(id)
-    }))
-    .filter(citation => citation.data) // dataが存在するもののみ
-    .sort((a, b) => a.number - b.number)
+  return window.citationManager.activeCitation === props.id && isVisible.value
 })
 
 // 引用をフォーマット
@@ -174,61 +165,62 @@ const updateForceUpdate = () => {
   forceUpdate.value++
 }
 
-// 現在のページに引用を追加
-const addToCurrentPage = () => {
-  if (!citationData.value) return
-  
-  const page = currentPage.value
-  if (!window.citationManager.pageActiveCitations.has(page)) {
-    window.citationManager.pageActiveCitations.set(page, new Set())
-  }
-  window.citationManager.pageActiveCitations.get(page).add(props.id)
-}
-
-// 現在のページから引用を削除
-const removeFromCurrentPage = () => {
-  const page = currentPage.value
-  const pageSet = window.citationManager.pageActiveCitations.get(page)
-  if (pageSet) {
-    pageSet.delete(props.id)
-    if (pageSet.size === 0) {
-      window.citationManager.pageActiveCitations.delete(page)
-    }
-  }
-}
-
-// ページ変更を監視
-watch(currentPage, (newPage, oldPage) => {
-  if (oldPage !== undefined) {
-    // 前のページから削除
-    const oldPageSet = window.citationManager.pageActiveCitations.get(oldPage)
-    if (oldPageSet) {
-      oldPageSet.delete(props.id)
-      if (oldPageSet.size === 0) {
-        window.citationManager.pageActiveCitations.delete(oldPage)
-      }
-    }
-  }
-  
-  // 新しいページに追加
-  addToCurrentPage()
+// この引用をアクティブにする
+const setActiveCitation = () => {
+  window.citationManager.activeCitation = props.id
+  isVisible.value = true
   triggerGlobalUpdate()
+}
+
+// この引用を非アクティブにする
+const clearActiveCitation = () => {
+  if (window.citationManager.activeCitation === props.id) {
+    window.citationManager.activeCitation = null
+    isVisible.value = false
+    triggerGlobalUpdate()
+  }
+}
+
+// マウスイベントハンドラー
+const handleMouseEnter = () => {
+  setActiveCitation()
+}
+
+const handleMouseLeave = () => {
+  // 少し遅延を入れて、マウスが引用情報エリアに移動する時間を確保
+  setTimeout(() => {
+    clearActiveCitation()
+  }, 100)
+}
+
+// ページ変更を監視（ページが変わったら引用を非表示）
+watch(currentPage, () => {
+  clearActiveCitation()
 })
 
 // コンポーネントのマウント時
 onMounted(() => {
-  if (citationData.value) {
-    addToCurrentPage()
-    window.citationManager.components.add({ updateForceUpdate })
-    triggerGlobalUpdate()
+  window.citationManager.components.add({ updateForceUpdate })
+  
+  // インライン引用番号にマウスイベントを追加
+  const supElement = document.querySelector(`sup:has([data-citation-id="${props.id}"])`)
+  if (supElement) {
+    supElement.addEventListener('mouseenter', handleMouseEnter)
+    supElement.addEventListener('mouseleave', handleMouseLeave)
   }
 })
 
 // コンポーネントのアンマウント時
 onUnmounted(() => {
-  removeFromCurrentPage()
   window.citationManager.components.delete({ updateForceUpdate })
-  triggerGlobalUpdate()
+  clearActiveCitation()
+  
+  // イベントリスナーを削除
+  const supElement = document.querySelector(`sup:has([data-citation-id="${props.id}"])`)
+  if (supElement) {
+    supElement.removeEventListener('mouseenter', handleMouseEnter)
+    supElement.removeEventListener('mouseleave', handleMouseLeave)
+  }
 })
 </script>
 
@@ -249,5 +241,17 @@ onUnmounted(() => {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* インライン引用番号のホバー効果 */
+sup {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+sup:hover {
+  background-color: rgba(37, 99, 235, 0.1);
+  border-radius: 2px;
+  padding: 1px 2px;
 }
 </style>

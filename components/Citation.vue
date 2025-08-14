@@ -5,9 +5,9 @@
       [{{ citationNumber }}]
     </sup>
     
-    <!-- 指定されたidの引用情報のみ表示（画面下部に表示） -->
+    <!-- このコンポーネント専用の引用情報表示エリア -->
     <div 
-      v-if="citationData && shouldShowCitation"
+      v-if="shouldShowCitation"
       class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-300 shadow-lg z-40 max-h-32 overflow-y-auto"
       style="pointer-events: none;"
     >
@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useSlideContext } from '@slidev/client'
 
 const { $slidev } = useSlideContext()
@@ -37,65 +37,74 @@ const props = defineProps({
   }
 })
 
-// グローバル引用管理の初期化
+// グローバル引用管理の初期化（引用番号のみ管理）
 if (!window.citationManager) {
   window.citationManager = {
     counter: 1,
-    citations: new Map(), // id -> { number, data, formatted }
-    activeCitation: null, // 現在表示中の引用id
-    components: new Set()
+    citations: new Map() // id -> { number, data, formatted }
   }
 }
 
-const forceUpdate = ref(0)
-const isVisible = ref(false)
+const isMounted = ref(false)
 
 // 現在のページ番号を取得
 const currentPage = computed(() => {
-  return $slidev.nav.currentPage
+  const page = $slidev.nav.currentPage
+  return page
 })
 
 // 引用データを取得
 const citationData = computed(() => {
-  return citations[props.id] || null
+  const data = citations[props.id] || null
+  return data
 })
 
 // 引用番号を取得または生成
 const citationNumber = computed(() => {
-  if (!citationData.value) return '?'
+  if (!citationData.value) {
+    return '?'
+  }
   
   if (!window.citationManager.citations.has(props.id)) {
-    window.citationManager.citations.set(props.id, {
+    const newCitation = {
       number: window.citationManager.counter,
       data: citationData.value,
       formatted: formatCitation(citationData.value)
-    })
+    }
+    window.citationManager.citations.set(props.id, newCitation)
     window.citationManager.counter++
   }
   
-  return window.citationManager.citations.get(props.id).number
+  const citation = window.citationManager.citations.get(props.id)
+  return citation.number
 })
 
-// フォーマットされた引用情報
+// フォーマットされた引用テキスト
 const formattedCitation = computed(() => {
-  if (!citationData.value) return '引用情報が見つかりません'
+  if (!citationData.value) {
+    return '引用情報が見つかりません'
+  }
   
-  if (window.citationManager.citations.has(props.id)) {
-    return window.citationManager.citations.get(props.id).formatted
+  const citation = window.citationManager.citations.get(props.id)
+  if (citation && citation.formatted) {
+    return citation.formatted
   }
   
   return formatCitation(citationData.value)
 })
 
-// この引用を表示すべきかどうか
+// 引用を表示すべきかどうか
 const shouldShowCitation = computed(() => {
-  forceUpdate.value // 依存関係を強制的に更新
-  return window.citationManager.activeCitation === props.id && isVisible.value
+  const shouldShow = isMounted.value && citationData.value !== null
+  
+  return shouldShow
 })
 
 // 引用をフォーマット
 const formatCitation = (data) => {
-  if (!data) return '引用情報が見つかりません'
+  if (!data) {
+    return '引用情報が見つかりません'
+  }
   
   let citation = ''
   
@@ -148,80 +157,39 @@ const formatCitation = (data) => {
     citation += `, ISSN: ${data.issn}`
   }
   
-  return citation || '引用情報が不完全です'
+  const formatted = citation || '引用情報が不完全です'
+  
+  return formatted
 }
 
-// 全コンポーネントの再描画をトリガー
-const triggerGlobalUpdate = () => {
-  window.citationManager.components.forEach(component => {
-    if (component.updateForceUpdate) {
-      component.updateForceUpdate()
-    }
-  })
+// 全体のグローバル状態をデバッグ出力
+const debugGlobalState = () => {
 }
-
-// 強制更新関数
-const updateForceUpdate = () => {
-  forceUpdate.value++
-}
-
-// この引用をアクティブにする
-const setActiveCitation = () => {
-  window.citationManager.activeCitation = props.id
-  isVisible.value = true
-  triggerGlobalUpdate()
-}
-
-// この引用を非アクティブにする
-const clearActiveCitation = () => {
-  if (window.citationManager.activeCitation === props.id) {
-    window.citationManager.activeCitation = null
-    isVisible.value = false
-    triggerGlobalUpdate()
-  }
-}
-
-// マウスイベントハンドラー
-const handleMouseEnter = () => {
-  setActiveCitation()
-}
-
-const handleMouseLeave = () => {
-  // 少し遅延を入れて、マウスが引用情報エリアに移動する時間を確保
-  setTimeout(() => {
-    clearActiveCitation()
-  }, 100)
-}
-
-// ページ変更を監視（ページが変わったら引用を非表示）
-watch(currentPage, () => {
-  clearActiveCitation()
-})
 
 // コンポーネントのマウント時
 onMounted(() => {
-  window.citationManager.components.add({ updateForceUpdate })
   
-  // インライン引用番号にマウスイベントを追加
-  const supElement = document.querySelector(`sup:has([data-citation-id="${props.id}"])`)
-  if (supElement) {
-    supElement.addEventListener('mouseenter', handleMouseEnter)
-    supElement.addEventListener('mouseleave', handleMouseLeave)
+  isMounted.value = true
+  
+  if (citationData.value) {
+    // 引用番号を生成（副作用でglobal stateに保存される）
+    const _ = citationNumber.value
+    debugGlobalState()
+  } else {
   }
 })
 
 // コンポーネントのアンマウント時
 onUnmounted(() => {
-  window.citationManager.components.delete({ updateForceUpdate })
-  clearActiveCitation()
   
-  // イベントリスナーを削除
-  const supElement = document.querySelector(`sup:has([data-citation-id="${props.id}"])`)
-  if (supElement) {
-    supElement.removeEventListener('mouseenter', handleMouseEnter)
-    supElement.removeEventListener('mouseleave', handleMouseLeave)
-  }
+  isMounted.value = false
+  debugGlobalState()
 })
+
+// 開発用：グローバル状態確認用の関数をwindowに追加
+if (typeof window !== 'undefined') {
+  window.debugCitationState = debugGlobalState
+}
 </script>
 
 <style scoped>
@@ -241,17 +209,5 @@ onUnmounted(() => {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
-}
-
-/* インライン引用番号のホバー効果 */
-sup {
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-sup:hover {
-  background-color: rgba(37, 99, 235, 0.1);
-  border-radius: 2px;
-  padding: 1px 2px;
 }
 </style>

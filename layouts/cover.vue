@@ -45,9 +45,17 @@
             getTitleSizeClass($slidev.configs.titleSize || 'large')
           ]"
         >
-          {{ $slidev.configs.coverTitle.first }}
-          <br>
-          {{ $slidev.configs.coverTitle.second }}
+          <template v-if="Array.isArray($slidev.configs.coverTitle)">
+            <span v-for="(line, index) in $slidev.configs.coverTitle" :key="index">
+              {{ line }}
+              <br v-if="index < $slidev.configs.coverTitle.length - 1">
+            </span>
+          </template>
+          <template v-else>
+            {{ $slidev.configs.coverTitle.first }}
+            <br>
+            {{ $slidev.configs.coverTitle.second }}
+          </template>
         </div>
         
         <!-- 著者情報 -->

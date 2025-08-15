@@ -38,8 +38,13 @@
           {{ $slidev.configs.meetingName }}
         </div>
         
-        <!-- メインタイトル -->
-        <div class="text-6xl font-bold text-slate-900 leading-tight ">
+        <!-- メインタイトル（サイズ指定可能） -->
+        <div 
+          :class="[
+            'font-bold text-slate-900 leading-tight',
+            getTitleSizeClass($slidev.configs.titleSize || 'large')
+          ]"
+        >
           {{ $slidev.configs.coverTitle.first }}
           <br>
           {{ $slidev.configs.coverTitle.second }}
@@ -67,3 +72,18 @@
     </div>
   </div>
 </template>
+
+<script setup>
+// タイトルサイズのクラスを返す関数
+function getTitleSizeClass(size) {
+  const sizeMap = {
+    'small': 'text-4xl',
+    'medium': 'text-5xl', 
+    'large': 'text-6xl',
+    'xlarge': 'text-7xl',
+    'xxlarge': 'text-8xl'
+  }
+  
+  return sizeMap[size] || sizeMap['large']
+}
+</script>

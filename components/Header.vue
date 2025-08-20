@@ -204,7 +204,7 @@ const displayChapterList = computed(() => {
   }
 })
 
-// appendixの開始ページを計算
+// appendixの開始ページを計算（SectionDivider考慮版）
 const appendixStartPage = computed(() => {
   const totalPages = $slidev.nav.total
   const appendixChapters = chapterList.value.filter(chapter => chapter.isAppendix)
@@ -225,32 +225,48 @@ const appendixStartPage = computed(() => {
     return total + sectionCount
   }, 0)
   
+  // appendix用SectionDividerの数
+  const appendixDividerCount = appendixChapters.length
+  
   console.log('  appendixSectionCount:', appendixSectionCount)
-  const result = totalPages - appendixSectionCount + 1
+  console.log('  appendixDividerCount:', appendixDividerCount)
+  
+  // 全ページ数からappendixのセクション数とSectionDivider数を引いて開始位置を計算
+  const result = totalPages - appendixSectionCount - appendixDividerCount + 1
   console.log('  appendixあり - 結果:', result)
   return result
 })
 
-// 調整されたページ総数（常にappendix前まで、appendixがない場合は全体から表紙を除く）
+// 調整されたページ総数（SectionDivider考慮版）
 const adjustedTotal = computed(() => {
   // chapterList（全体）からappendixを検索
   const appendixChapters = chapterList.value.filter(chapter => chapter.isAppendix)
+  const normalChapters = chapterList.value.filter(chapter => !chapter.isAppendix && chapter.key !== 'ref')
+  
+  // SectionDividerの数を計算
+  const normalChapterDividers = normalChapters.length  // 通常章のSectionDivider数
+  const appendixChapterDividers = appendixChapters.length  // appendix章のSectionDivider数
+  const totalDividers = normalChapterDividers + appendixChapterDividers
   
   // デバッグ用ログ
   console.log('全chapterList:', chapterList.value)
+  console.log('normalChapters:', normalChapters)
   console.log('appendixChapters:', appendixChapters)
-  console.log('appendixChapters.length:', appendixChapters.length)
+  console.log('normalChapterDividers:', normalChapterDividers)
+  console.log('appendixChapterDividers:', appendixChapterDividers)
+  console.log('totalDividers:', totalDividers)
   console.log('$slidev.nav.total:', $slidev.nav.total)
-  console.log('appendixStartPage.value:', appendixStartPage.value)
   
   if (appendixChapters.length === 0) {
-    // appendixがない場合は全体のページ数から表紙を除く
-    console.log('appendixなし - 計算結果:', $slidev.nav.total - 1)
-    return $slidev.nav.total - 1
+    // appendixがない場合は全体のページ数から表紙と
+    const result = $slidev.nav.total - 1 
+    console.log('appendixなし - 計算結果:', result)
+    return result
   } else {
-    // appendixがある場合はappendix開始前のページ数から表紙を除く
-    console.log('appendixあり - 計算結果:', appendixStartPage.value - 2)
-    return appendixStartPage.value - 2
+    // appendixがある場合はappendix開始前のページ数から表紙と通常章のSectionDividerを除く
+    const result = appendixStartPage.value - 2 
+    console.log('appendixあり - 計算結果:', result)
+    return result
   }
 })
 

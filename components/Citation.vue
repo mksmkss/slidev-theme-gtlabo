@@ -37,11 +37,33 @@ const props = defineProps({
   }
 })
 
-// グローバル引用管理の初期化（引用番号のみ管理）
+// グローバル引用管理の初期化
 if (!window.citationManager) {
   window.citationManager = {
-    counter: 1,
-    citations: new Map() // id -> { number, data, formatted }
+    citations: new Map(), // id -> { number, data, formatted }
+    citationKeys: Object.keys(citations), // frontmatterのキーの順番を保持
+    initialized: false
+  }
+}
+
+// frontmatterの順番でcitation番号を事前に割り当て
+const initializeCitations = () => {
+  if (!window.citationManager.initialized) {
+    window.citationManager.citationKeys = Object.keys(citations)
+    
+    window.citationManager.citationKeys.forEach((key, index) => {
+      if (!window.citationManager.citations.has(key)) {
+        const data = citations[key]
+        const newCitation = {
+          number: index + 1, // 1から開始
+          data: data,
+          formatted: formatCitation(data)
+        }
+        window.citationManager.citations.set(key, newCitation)
+      }
+    })
+    
+    window.citationManager.initialized = true
   }
 }
 
@@ -59,24 +81,21 @@ const citationData = computed(() => {
   return data
 })
 
-// 引用番号を取得または生成
+// 引用番号を取得
 const citationNumber = computed(() => {
   if (!citationData.value) {
     return '?'
   }
   
-  if (!window.citationManager.citations.has(props.id)) {
-    const newCitation = {
-      number: window.citationManager.counter,
-      data: citationData.value,
-      formatted: formatCitation(citationData.value)
-    }
-    window.citationManager.citations.set(props.id, newCitation)
-    window.citationManager.counter++
-  }
+  // 初期化を確実に実行
+  initializeCitations()
   
   const citation = window.citationManager.citations.get(props.id)
-  return citation.number
+  if (citation) {
+    return citation.number
+  }
+  
+  return '?'
 })
 
 // フォーマットされた引用テキスト
@@ -96,7 +115,6 @@ const formattedCitation = computed(() => {
 // 引用を表示すべきかどうか
 const shouldShowCitation = computed(() => {
   const shouldShow = isMounted.value && citationData.value !== null
-  
   return shouldShow
 })
 
@@ -158,30 +176,30 @@ const formatCitation = (data) => {
   }
   
   const formatted = citation || '引用情報が不完全です'
-  
   return formatted
 }
 
 // 全体のグローバル状態をデバッグ出力
 const debugGlobalState = () => {
+  // デバッグ用（必要に応じてコメントアウト）
 }
 
 // コンポーネントのマウント時
 onMounted(() => {
-  
   isMounted.value = true
   
+  // 初期化を確実に実行
+  initializeCitations()
+  
   if (citationData.value) {
-    // 引用番号を生成（副作用でglobal stateに保存される）
+    // 引用番号を取得（副作用でglobal stateに保存される）
     const _ = citationNumber.value
     debugGlobalState()
-  } else {
   }
 })
 
 // コンポーネントのアンマウント時
 onUnmounted(() => {
-  
   isMounted.value = false
   debugGlobalState()
 })

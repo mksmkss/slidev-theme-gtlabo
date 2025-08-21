@@ -17,9 +17,9 @@
           :key="citation.key"
           class="citation-item border-l-2 border-sky-400 pl-3 py-1"
         >
-          <!-- 引用キー -->
+          <!-- 引用番号（frontmatterの順番に基づく） -->
           <div class="text-sm font-semibold text-sky-700 mb-1">
-            [{{ citation.key }}]
+            [{{ citation.number }}]
           </div>
             
           <!-- 引用情報 -->
@@ -164,19 +164,23 @@ const props = defineProps({
   // 表示順序
   sortBy: {
     type: String,
-    default: 'key', // 'key', 'author', 'year' など
+    default: 'frontmatter', // 'frontmatter', 'key', 'author', 'year' など
   }
 })
 
-// 参考文献リストを生成
+// 参考文献リストを生成（frontmatterの順番を維持）
 const citationsList = computed(() => {
   if (!citations || typeof citations !== 'object') {
     return []
   }
   
-  const list = Object.keys(citations).map(key => ({
+  // frontmatterの記述順でキーを取得
+  const originalKeys = Object.keys(citations)
+  
+  const list = originalKeys.map((key, index) => ({
     key,
-    data: citations[key]
+    data: citations[key],
+    number: index + 1 // frontmatterの順番に基づく番号
   }))
   
   // ソート処理
@@ -194,8 +198,11 @@ const citationsList = computed(() => {
         return yearB - yearA // 降順（新しい順）
       })
     case 'key':
-    default:
       return list.sort((a, b) => a.key.localeCompare(b.key))
+    case 'frontmatter':
+    default:
+      // frontmatterの順番を維持（デフォルト）
+      return list
   }
 })
 

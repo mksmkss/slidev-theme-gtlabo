@@ -6,8 +6,8 @@ export default defineConfig({
       md: '1rem',
     },
     colors: {
-      'text-main': 'rgba(31, 41, 55, 1)',
-      'theme-color': 'rgba(2, 132, 199, 1)',
+      'text-main': '#1f2937',
+      'theme-color': '#0284c7',
     },
   },
 })

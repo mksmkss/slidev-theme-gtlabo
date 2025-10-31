@@ -18,12 +18,12 @@
           class="citation-item border-l-2 border-sky-400 pl-3 py-1"
         >
           <!-- 引用番号（frontmatterの順番に基づく） -->
-          <div class="text-sm font-semibold text-sky-700 mb-1">
+          <div :class="numberSizeClass">
             [{{ citation.number }}]
           </div>
             
           <!-- 引用情報 -->
-          <div class="text-xs text-gray-700 leading-relaxed">
+          <div :class="textSizeClass">
             <!-- 著者 -->
             <span
               v-if="citation.data.author"
@@ -87,7 +87,7 @@
             <!-- DOI -->
             <div
               v-if="citation.data.doi"
-              class="mt-1 text-xs text-blue-600"
+              :class="linkSizeClass"
             >
               DOI: <a
                 :href="`https://doi.org/${citation.data.doi}`"
@@ -101,7 +101,7 @@
             <!-- URL -->
             <div
               v-if="citation.data.url && !citation.data.doi"
-              class="mt-1 text-xs text-blue-600"
+              :class="linkSizeClass"
             >
               URL: <a
                 :href="citation.data.url"
@@ -115,7 +115,7 @@
             <!-- ISSN -->
             <div
               v-if="citation.data.issn"
-              class="mt-1 text-xs text-gray-500"
+              :class="linkSizeClass"
             >
               ISSN: {{ citation.data.issn }}
             </div>
@@ -139,7 +139,7 @@
       
     <!-- フッター（必要に応じて） -->
     <div class="flex-shrink-0 mt-4 pt-2 border-t border-gray-300 px-6">
-      <div class="text-xs text-gray-600 text-center">
+      <div :class="footerSizeClass">
         {{ citationsList.length }} 件の参考文献
       </div>
     </div>
@@ -154,7 +154,7 @@ import { useSlideContext } from '@slidev/client'
 const { $slidev } = useSlideContext()
 const citations = $slidev.configs.citations || {}
 
-// プロパティ定義（必要に応じて）
+// プロパティ定義
 const props = defineProps({
   // 表示スタイルのカスタマイズ用
   style: {
@@ -165,6 +165,13 @@ const props = defineProps({
   sortBy: {
     type: String,
     default: 'frontmatter', // 'frontmatter', 'key', 'author', 'year' など
+  },
+  // 文字サイズ
+  size: {
+    type: String,
+    default: 'md',
+    validator: (value) => ['xs', 'sm', 'md', 'lg', 'xl'].includes(value),
+    description: '文字サイズ（xs, sm, md, lg, xl）'
   }
 })
 
@@ -206,12 +213,44 @@ const citationsList = computed(() => {
   }
 })
 
-// スタイル別のフォーマット関数（将来的な拡張用）
-const formatCitation = (citation, style = 'academic') => {
-  // 現在は academic スタイルのみ実装
-  // 将来的にIEEE、APA等のスタイルを追加可能
-  return citation
+// 文字サイズのクラス
+const sizeMap = {
+  xs: {
+    number: 'text-xs font-semibold text-sky-700 mb-0.5',
+    text: 'text-[10px] text-gray-700 leading-relaxed',
+    link: 'mt-0.5 text-[9px] text-blue-600',
+    footer: 'text-[10px] text-gray-600 text-center'
+  },
+  sm: {
+    number: 'text-xs font-semibold text-sky-700 mb-0.5',
+    text: 'text-xs text-gray-700 leading-relaxed',
+    link: 'mt-0.5 text-[10px] text-blue-600',
+    footer: 'text-xs text-gray-600 text-center'
+  },
+  md: {
+    number: 'text-sm font-semibold text-sky-700 mb-1',
+    text: 'text-xs text-gray-700 leading-relaxed',
+    link: 'mt-1 text-xs text-blue-600',
+    footer: 'text-xs text-gray-600 text-center'
+  },
+  lg: {
+    number: 'text-base font-semibold text-sky-700 mb-1',
+    text: 'text-sm text-gray-700 leading-relaxed',
+    link: 'mt-1 text-sm text-blue-600',
+    footer: 'text-sm text-gray-600 text-center'
+  },
+  xl: {
+    number: 'text-lg font-semibold text-sky-700 mb-1.5',
+    text: 'text-base text-gray-700 leading-relaxed',
+    link: 'mt-1.5 text-base text-blue-600',
+    footer: 'text-base text-gray-600 text-center'
+  }
 }
+
+const numberSizeClass = computed(() => sizeMap[props.size].number)
+const textSizeClass = computed(() => sizeMap[props.size].text)
+const linkSizeClass = computed(() => sizeMap[props.size].link)
+const footerSizeClass = computed(() => sizeMap[props.size].footer)
 </script>
   
 <style scoped>

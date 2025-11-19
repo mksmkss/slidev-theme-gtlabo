@@ -1,279 +1,194 @@
 <template>
-  <div class="slidev-layout cover relative overflow-hidden animated-gradient">
-    <!-- ランダムに動く大きな円形要素(右上) -->
-    <div 
-      ref="circle1"
-      class="absolute -right-32 -top-32 w-96 h-96 bg-sky-300/70 rounded-full transition-all duration-[3000ms] ease-in-out"
-      :style="circleStyles[0]"
-    />
-    <div 
-      ref="circle2"
-      class="absolute right-8 top-24 w-64 h-64 bg-sky-400/60 rounded-full transition-all duration-[4000ms] ease-in-out"
-      :style="circleStyles[1]"
-    />
+  <div class="slidev-layout cover relative w-full h-full !p-0 bg-white overflow-hidden font-sans text-slate-900 selection:bg-sky-200 selection:text-sky-900">
     
-    <!-- ランダムに動く左下の三角形要素 -->
-    <div 
-      class="absolute left-16 bottom-16 w-0 h-0 border-l-48 border-r-48 border-b-80 border-transparent border-b-sky-400/50 transition-all duration-[3500ms] ease-in-out"
-      :style="triangleStyles[0]"
-    />
-    <div 
-      class="absolute left-32 bottom-32 w-0 h-0 border-l-32 border-r-32 border-b-56 border-transparent border-b-sky-500/55 transition-all duration-[4500ms] ease-in-out"
-      :style="triangleStyles[1]"
-    />
-    
-    <!-- ランダムに動く右下の斜線要素 -->
-    <div 
-      class="absolute right-25 bottom-5 space-y-8 transition-all duration-[5000ms] ease-in-out"
-      :style="linesStyle"
-    >
+    <div class="absolute inset-0 z-0 pointer-events-none opacity-10" 
+         style="background-image: linear-gradient(#0f172a 1px, transparent 1px), linear-gradient(to right, #0f172a 1px, transparent 1px); background-size: 50px 50px;">
+    </div>
+
+    <div class="absolute -top-[20%] -right-[10%] w-[80vh] h-[80vh] z-0 pointer-events-none opacity-20">
+      <div class="absolute inset-0 border-3 border-dashed border-slate-700 rounded-full animate-spin-super-slow"></div>
+      <div class="absolute inset-[15%] border-3 border-dotted border-sky-700 rounded-full animate-reverse-spin-slow"></div>
+
+    </div>
+
+    <div class="absolute bottom-[10%] left-[5%] w-32 h-32 z-0 pointer-events-none opacity-30">
+       <svg class="w-full h-full animate-spin-slow text-sky-800" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+         <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="0.8" stroke-dasharray="4 4" />
+         <rect x="49.5" y="10" width="1" height="80" fill="currentColor" />
+         <rect x="10" y="49.5" width="80" height="1" fill="currentColor" />
+       </svg>
+    </div>
+    <div class="absolute right-0 top-0 w-1/3 h-full z-0 pointer-events-none">
       <div 
-        v-for="(width, index) in lineWidths" 
-        :key="index"
-        class="h-3 rounded-md bg-sky-500/70 transition-all duration-[2000ms] ease-in-out"
-        :style="{ width: `${width}px` }"
+        class="absolute right-0 top-0 w-full h-full bg-slate-50 transform origin-right transition-transform duration-[1500ms] ease-expo-out"
+        :class="mounted ? 'scale-x-100' : 'scale-x-0'"
       />
-    </div>    
-    
-    <!-- ランダムに動く左上の円形グリッド -->
-    <div 
-      class="absolute left-16 top-16 grid grid-cols-3 gap-3 opacity-60 rotating-grid"
-      :style="gridStyle"
-    >
       <div 
-        v-for="(dot, index) in dots" 
-        :key="index"
-        :class="[
-          'w-8 h-8 rounded-full transition-all duration-[2500ms] ease-in-out',
-          dot.filled ? 'bg-sky-600' : 'border-2 border-sky-700'
-        ]"
-        :style="dot.style"
+        class="absolute right-[15%] top-0 w-32 h-full bg-sky-600/10 transform origin-top transition-transform duration-[2000ms] ease-expo-out delay-100"
+        :class="mounted ? 'scale-y-100' : 'scale-y-0'"
+      />
+      <div 
+        class="absolute right-[25%] bottom-0 w-4 h-2/3 bg-slate-900 transform origin-bottom transition-transform duration-[2000ms] ease-expo-out delay-300"
+        :class="mounted ? 'scale-y-100' : 'scale-y-0'"
+      />
+      <div 
+        class="absolute right-0 top-1/4 w-1/2 h-24 bg-sky-500 transform origin-right transition-all duration-[2500ms] ease-in-out delay-500"
+        :class="mounted ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'"
       />
     </div>
-    
-    <!-- メインコンテンツ -->
-    <div class="relative z-10 flex flex-col justify-center items-start px-8 py-12">
-      <div class="max-w-4xl w-full space-y-6">
-        <!-- 会議名 -->
-        <div class="text-2xl font-semibold text-slate-700">
-          {{ $slidev.configs.meetingName }}
-        </div>
+
+    <div class="relative z-10 flex flex-col justify-between h-full pl-16 pr-12 py-16 w-full">
+      
+      <div class="flex flex-col items-start space-y-4">
+        <div 
+          class="w-24 h-2 bg-slate-900 transition-all duration-1000 ease-out"
+          :class="mounted ? 'w-24 opacity-100' : 'w-0 opacity-0'"
+        />
         
-        <!-- メインタイトル -->
+        <div class="space-y-2 ml-4">
+            <div class="overflow-hidden">
+              <div
+                class="text-lg font-bold tracking-widest uppercase text-slate-800 transition-transform duration-1000 ease-out delay-300"
+                :class="mounted ? 'translate-y-0' : 'translate-y-full'"
+              >
+                {{ $slidev.configs.meetingName }}
+              </div>
+            </div>
+            <div class="overflow-hidden">
+              <div
+                class="text-base font-mono text-sky-800 transition-transform duration-1000 ease-out delay-400"
+                :class="mounted ? 'translate-y-0' : 'translate-y-full'"
+              >
+                {{ $slidev.configs.date }}
+              </div>
+            </div>
+        </div>
+      </div>
+      
+      <div class="space-y-6 py-8 w-full">
         <div 
           :class="[
-            'font-bold text-slate-900 leading-tight ',
-            getTitleSizeClass($slidev.configs.titleSize || 'large')
+            'font-bold text-slate-900 leading-[0.9] tracking-tight transition-all duration-1000 ease-out delay-500 w-full !max-w-none break-words space-y-6',
+            getTitleSizeClass($slidev.configs.titleSize || 'large'),
+            mounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
           ]"
         >
           <template v-if="Array.isArray($slidev.configs.coverTitle)">
-            <span v-for="(line, index) in $slidev.configs.coverTitle" :key="index">
+            <span v-for="(line, index) in $slidev.configs.coverTitle" :key="index" class="block">
               {{ line }}
-              <br v-if="index < $slidev.configs.coverTitle.length - 1">
             </span>
           </template>
           <template v-else>
-            {{ $slidev.configs.coverTitle.first }}
-            <br>
-            {{ $slidev.configs.coverTitle.second }}
+            <span class="block">{{ $slidev.configs.coverTitle.first }}</span>
+            <span class="block text-slate-500">{{ $slidev.configs.coverTitle.second }}</span>
           </template>
         </div>
+      </div>
+      
+      <div class="flex flex-col space-y-6 pt-8 transition-opacity duration-1000 delay-700 w-full"
+           :class="mounted ? 'opacity-100' : 'opacity-0'">
         
-        <!-- 著者情報 -->
-        <div class="space-y-4">
-          <div class="flex flex-col items-end justify-between w-full w-full px-20">
-            <div class="text-2xl font-semibold text-slate-800 ">
-              {{ $slidev.configs.author.affiliation }}<span class="text-sky-600 ml-2">*</span>{{ $slidev.configs.author.name }}
+        <div class="grid grid-cols-2 gap-12">
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Presenter</div>
+            <div class="text-2xl font-bold text-slate-900 whitespace-nowrap">
+              {{ $slidev.configs.author.name }}
             </div>
-            
-            <!-- 共著者 (存在する場合) -->
-            <div v-if="coAuthors.length > 0" class="space-y-1 flex flex-col items-end">
+            <div class="text-sm font-medium text-sky-700 mt-1">
+              {{ $slidev.configs.author.affiliation }}
+            </div>
+          </div>
+
+          <div v-if="coAuthors.length > 0">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Co-Authors</div>
+            <div class="space-y-2">
               <div
                 v-for="(coAuthor, index) in coAuthors"
                 :key="index"
-                class="text-2xl font-semibold text-slate-800"
+                class="flex flex-col"
               >
-                <span class="mr-2"> {{ coAuthor.affiliation }}</span> {{ coAuthor.name }}
+                <span class="text-lg font-semibold text-slate-800 whitespace-nowrap">{{ coAuthor.name }}</span>
+                <span class="text-xs text-slate-500">{{ coAuthor.affiliation }}</span>
               </div>
             </div>
-          </div>
-          
-          <div class="text-xl font-semibold text-slate-700">
-            {{ $slidev.configs.date }}
           </div>
         </div>
       </div>
     </div>
-    
-    <!-- 左下のコピーライト風エリア -->
-    <div class="absolute bottom-4 left-8 text-slate-700 text-sm font-medium">
-      {{ new Date().getFullYear() }} {{ $slidev.configs.author.affiliation }}
+
+    <div class="absolute bottom-4 right-4 text-[10px] font-mono text-slate-800 z-20 writing-vertical-rl">
+      © {{ new Date().getFullYear() }} {{ $slidev.configs.author.affiliation }} 
     </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useSlideContext } from '@slidev/client'
 
 const { $slidev } = useSlideContext()
+const mounted = ref(false)
 
-// タイトルサイズのクラスを返す関数
+onMounted(() => {
+  setTimeout(() => {
+    mounted.value = true
+  }, 100)
+})
+
 function getTitleSizeClass(size) {
   const sizeMap = {
     'small': 'text-4xl',
     'medium': 'text-5xl', 
-    'large': 'text-6xl',
-    'xlarge': 'text-7xl',
-    'xxlarge': 'text-8xl'
+    'large': 'text-8xl', 
+    'xlarge': 'text-9xl',
+    'xxlarge': 'text-[10rem]'
   }
-  
   return sizeMap[size] || sizeMap['large']
 }
 
-// 共著者リストを取得
 const coAuthors = computed(() => {
   const configs = $slidev.configs
   if (!configs || !configs.coAuthors || !Array.isArray(configs.coAuthors)) {
     return []
   }
-  console.log(configs.coAuthors)
-  // 最大4人まで
   return configs.coAuthors.slice(0, 4)
-})
-
-// ランダムな値を生成する関数
-const randomRange = (min, max) => Math.random() * (max - min) + min
-
-// 初期状態でランダムな位置を設定
-const circleStyles = ref([
-  { transform: `translate(${randomRange(-15, 15)}px, ${randomRange(-15, 15)}px) rotate(${randomRange(-5, 5)}deg)` },
-  { transform: `translate(${randomRange(-20, 20)}px, ${randomRange(-20, 20)}px) rotate(${randomRange(-8, 8)}deg)` }
-])
-
-const triangleStyles = ref([
-  { transform: `translate(${randomRange(-10, 10)}px, ${randomRange(-10, 10)}px) rotate(${randomRange(-3, 3)}deg)` },
-  { transform: `translate(${randomRange(-12, 12)}px, ${randomRange(-12, 12)}px) rotate(${randomRange(-4, 4)}deg)` }
-])
-
-const linesStyle = ref({ 
-  transform: `translate(${randomRange(-15, 15)}px, ${randomRange(-15, 15)}px) rotate(${randomRange(55, 65)}deg)` 
-})
-
-const lineWidths = ref([
-  randomRange(180, 204),
-  randomRange(130, 158),
-  randomRange(180, 204),
-  randomRange(85, 107)
-])
-
-const gridStyle = ref({})
-
-const dots = ref([
-  { filled: true, style: { transform: `scale(${randomRange(0.85, 1.15)})` } },
-  { filled: false, style: { transform: `scale(${randomRange(0.85, 1.15)})` } },
-  { filled: true, style: { transform: `scale(${randomRange(0.85, 1.15)})` } },
-  { filled: true, style: { transform: `scale(${randomRange(0.85, 1.15)})` } },
-  { filled: true, style: { transform: `scale(${randomRange(0.85, 1.15)})` } },
-  { filled: false, style: { transform: `scale(${randomRange(0.85, 1.15)})` } },
-  { filled: false, style: { transform: `scale(${randomRange(0.85, 1.15)})` } },
-  { filled: true, style: { transform: `scale(${randomRange(0.85, 1.15)})` } },
-  { filled: true, style: { transform: `scale(${randomRange(0.85, 1.15)})` } }
-])
-
-// アニメーション更新関数
-const updateAnimations = () => {
-  // 円形要素をランダムに動かす
-  circleStyles.value[0] = {
-    transform: `translate(${randomRange(-15, 15)}px, ${randomRange(-15, 15)}px) rotate(${randomRange(-5, 5)}deg)`
-  }
-  circleStyles.value[1] = {
-    transform: `translate(${randomRange(-20, 20)}px, ${randomRange(-20, 20)}px) rotate(${randomRange(-8, 8)}deg)`
-  }
-  
-  // 三角形要素をランダムに動かす
-  triangleStyles.value[0] = {
-    transform: `translate(${randomRange(-10, 10)}px, ${randomRange(-10, 10)}px) rotate(${randomRange(-3, 3)}deg)`
-  }
-  triangleStyles.value[1] = {
-    transform: `translate(${randomRange(-12, 12)}px, ${randomRange(-12, 12)}px) rotate(${randomRange(-4, 4)}deg)`
-  }
-  
-  // 斜線要素をランダムに動かす
-  linesStyle.value = {
-    transform: `translate(${randomRange(-15, 15)}px, ${randomRange(-15, 15)}px) rotate(${randomRange(55, 65)}deg)`
-  }
-  
-  // 斜線の幅をランダムに変更
-  lineWidths.value = [
-    randomRange(180, 204),
-    randomRange(130, 158),
-    randomRange(180, 204),
-    randomRange(85, 107)
-  ]
-  
-  // ドットをランダムにスケール変更
-  dots.value = dots.value.map(dot => ({
-    ...dot,
-    style: {
-      transform: `scale(${randomRange(0.85, 1.15)})`
-    }
-  }))
-}
-
-let intervalId = null
-
-onMounted(() => {
-  // 即座に最初のアニメーションを開始
-  setTimeout(() => {
-    updateAnimations()
-  }, 100)
-  
-  // 定期的にアニメーションを更新(3秒ごと)
-  intervalId = setInterval(() => {
-    updateAnimations()
-  }, 3000)
-})
-
-onUnmounted(() => {
-  if (intervalId) {
-    clearInterval(intervalId)
-  }
 })
 </script>
 
 <style scoped>
-/* グラデーション背景のアニメーション */
-@keyframes gradient-shift {
-  0% {
-    background: linear-gradient(to bottom right, white, #f3f4f6, #e0f2fe);
-  }
-  33% {
-    background: linear-gradient(to bottom right, white, #eff6ff, #dbeafe);
-  }
-  66% {
-    background: linear-gradient(to bottom right, white, #f3f4f6, #dbeafe);
-  }
-  100% {
-    background: linear-gradient(to bottom right, white, #f3f4f6, #e0f2fe);
-  }
+.slidev-layout {
+  padding: 0 !important;
 }
 
-.animated-gradient {
-  animation: gradient-shift 20s ease-in-out infinite;
+.ease-expo-out {
+  transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+}
+.writing-vertical-rl {
+  writing-mode: vertical-rl;
+}
+div {
+  font-feature-settings: "palt", "kern";
 }
 
-/* グリッドの常時回転アニメーション */
-@keyframes rotate-continuously {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* === カスタムアニメーション定義 === */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes reverse-spin-slow {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
 }
 
-.rotating-grid {
-  animation: rotate-continuously 120s linear infinite;
+/* Tailwindのデフォルトspinより遥かに遅く設定し、上品さを出す */
+.animate-spin-super-slow {
+  animation: spin-slow 80s linear infinite;
+}
+.animate-reverse-spin-slow {
+  animation: reverse-spin-slow 40s linear infinite;
+}
+.animate-spin-slow {
+  animation: spin-slow 30s linear infinite;
 }
 </style>

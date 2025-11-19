@@ -1,3 +1,4 @@
+<!-- components/TableOfContents.vue -->
 <template>
   <div class="table-of-contents-container flex flex-col justify-center bg-theme-color">
     <!-- ヘッダー -->

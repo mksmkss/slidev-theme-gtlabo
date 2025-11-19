@@ -1,72 +1,126 @@
-<!-- components/SectionDivider.vue -->
+<!-- components/TableOfContents.vue -->
 <template>
-  <div class="table-of-contents-container flex flex-col justify-start bg-white overflow-hidden relative">
-    <!-- 厳密な背景グリッド - Swiss Styleの基礎 -->
-    <div class="absolute inset-0 z-0 pointer-events-none opacity-10" 
-         style="background-image: linear-gradient(#0f172a 1px, transparent 1px), linear-gradient(to right, #0f172a 1px, transparent 1px); background-size: 50px 50px;">
-    </div>
-
-    <!-- 非対称の幾何学的構成要素 - 左上の強調 -->
-    <div class="absolute top-0 left-0 w-2 h-32 bg-slate-900 z-5"></div>
-    <div class="absolute top-0 left-0 w-32 h-2 bg-slate-900 z-5"></div>
-    
-    <!-- 非対称の幾何学的構成要素 - 右下のアクセント -->
-    <div class="absolute bottom-0 right-0 w-48 h-2 bg-slate-900 z-5"></div>
-    <div class="absolute bottom-12 right-0 w-1 h-48 bg-slate-900 opacity-30 z-5"></div>
-
-    <!-- 右側の装飾バー群 - cover.vueと同じスタイル -->
-    <div class="absolute right-0 top-0 w-1/4 h-full z-0 pointer-events-none">
-      <div class="absolute right-0 top-0 w-full h-full bg-gradient-to-l from-slate-200 to-slate-200/10" />
-      <div class="absolute right-[15%] top-0 w-32 h-[35%] bg-sky-600/10" />
-      <div class="absolute right-0 bottom-0 w-2 h-[40%] bg-slate-900" />
-    </div>
-
-    <!-- 機能的なsky-500のアクセントブロック -->
-    <div class="absolute right-0 top-1/4 w-[12%] h-24 bg-sky-500/30 z-5"></div>
-
-    <!-- ヘッダー - 付録セクション用 -->
+  <div class="table-of-contents-container flex flex-col justify-center bg-theme-color">
+    <!-- ヘッダー -->
     <div
       v-if="isAppendixSection"
       :class="headerClasses"
-      class="relative z-10"
     >
-      <div class="flex items-start space-x-6">
-        <div :class="headerTitleClasses" class="font-bold uppercase tracking-widest text-slate-800 leading-none">
-          APPENDIX
-        </div>
-      </div>
+      <p :class="headerTitleClasses">
+        付録
+      </p>
     </div>
       
-    <!-- メインコンテンツ - 厳密なグリッドベース -->
-    <div :class="mainContentClasses" class="relative z-10">
+    <!-- メインコンテンツ -->
+    <div :class="mainContentClasses">
       <div class="max-w-full w-full">
-        <!-- 共通の目次表示 -->
-        <div :class="gridClasses">
-          <ChapterItem
-            v-for="(chapter, index) in displayChapters"
+        <!-- 通常の目次表示 -->
+        <div
+          v-if="!isAppendixSection"
+          :class="gridClasses"
+        >
+          <div 
+            v-for="(chapter, index) in regularChapters" 
             :key="chapter.key"
-            :chapter="chapter"
-            :index="index"
-            :is-next="isNextChapter(chapter.key)"
-            :is-appendix="isAppendixSection"
-            :size="size"
-            :config="currentConfig"
-          />
+            class="flex flex-col"
+            :class="{ 'relative': isNextChapter(chapter.key) }"
+          >
+            <!-- 次の章の強調表示 -->
+            <div 
+              v-if="isNextChapter(chapter.key)"
+              :class="highlightBorderClasses"
+            />
+            <div 
+              v-if="isNextChapter(chapter.key)"
+              :class="nextBadgeClasses"
+            >
+              NEXT
+            </div>
+                  
+            <!-- 章番号とタイトル -->
+            <div :class="chapterHeaderClasses">
+              <div :class="chapterNumberClasses">
+                {{ String(index + 1).padStart(2, '0') }}
+              </div>
+              <div class="flex-1 border-b border-white pb-2">
+                <span :class="chapterTitleClasses">
+                  {{ chapter.title }}
+                </span>
+              </div>
+            </div>
+                  
+            <!-- セクション一覧（重複除去済み） -->
+            <div :class="sectionListClasses">
+              <div 
+                v-for="(sectionData, sectionIndex) in chapter.uniqueSections" 
+                :key="`${chapter.key}-${sectionIndex}`"
+                :class="sectionItemClasses"
+              >
+                <span :class="sectionTextClasses">
+                  {{ sectionData.title }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        <!-- 付録の目次表示 -->
+        <div
+          v-else
+          :class="gridClasses"
+        >
+          <div 
+            v-for="(chapter, index) in appendixChapters" 
+            :key="chapter.key"
+            class="flex flex-col"
+            :class="{ 'relative': isNextChapter(chapter.key) }"
+          >
+            <!-- 次の章の強調表示 -->
+            <div 
+              v-if="isNextChapter(chapter.key)"
+              :class="highlightBorderClasses"
+            />
+            <div 
+              v-if="isNextChapter(chapter.key)"
+              :class="nextBadgeClasses"
+            >
+              NEXT
+            </div>
+                  
+            <!-- 付録番号とタイトル -->
+            <div :class="chapterHeaderClasses">
+              <div :class="appendixNumberClasses">
+                A{{ index + 1 }}
+              </div>
+              <div class="flex-1 border-b border-white pb-2">
+                <h2 :class="chapterTitleClasses">
+                  {{ chapter.title }}
+                </h2>
+              </div>
+            </div>
+                  
+            <!-- セクション一覧（重複除去済み） -->
+            <div :class="sectionListClasses">
+              <div 
+                v-for="(sectionData, sectionIndex) in chapter.uniqueSections" 
+                :key="`${chapter.key}-${sectionIndex}`"
+                :class="sectionItemClasses"
+              >
+                <span :class="sectionTextClasses">
+                  {{ sectionData.title }}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- タイポグラフィックな署名 - 客観性の表明 -->
-    <div class="absolute bottom-4 left-6 text-[10px] font-mono text-slate-800 uppercase tracking-widest z-20">
-      CONTENTS
     </div>
   </div>
 </template>
-
+      
 <script setup>
 import { computed } from 'vue'
 import { useSlideContext } from '@slidev/client'
-import ChapterItem from './ChapterItem.vue'
 
 // Slidevコンテキストからconfigsにアクセス
 const { $slidev } = useSlideContext()
@@ -76,7 +130,7 @@ const props = defineProps({
   nextChapter: {
     type: String,
     required: true,
-    description: '次に始まる章のキー（例: "c2", "c3", "ap1"）'
+    description: '次に始まる章のキー'
   },
   currentChapter: {
     type: String,
@@ -124,14 +178,14 @@ const isAppendixSection = computed(() => {
   return props.nextChapter.startsWith('ap')
 })
 
-// 章リストを取得する共通関数
-const getChapterList = (filterFn) => {
+// 通常の章リスト（refと付録を除外）
+const regularChapters = computed(() => {
   if (!chapters || typeof chapters !== 'object') {
     return []
   }
   
   return Object.keys(chapters)
-    .filter(filterFn)
+    .filter(chapterKey => chapterKey !== 'ref' && !chapterKey.startsWith('ap'))
     .map(chapterKey => {
       const chapter = chapters[chapterKey]
       const sections = chapter?.sections || {}
@@ -142,102 +196,117 @@ const getChapterList = (filterFn) => {
         title: chapter?.title || `章 ${chapterKey}`,
         sections: sectionKeys,
         sectionData: sections,
-        uniqueSections: getUniqueSections(chapterKey)
+        uniqueSections: getUniqueSections(chapterKey) // 重複除去済みセクション
       }
     })
-}
-
-// 通常の章リスト（refと付録を除外）
-const regularChapters = computed(() => 
-  getChapterList(chapterKey => chapterKey !== 'ref' && !chapterKey.startsWith('ap'))
-)
+})
 
 // 付録の章リスト
-const appendixChapters = computed(() => 
-  getChapterList(chapterKey => chapterKey.startsWith('ap'))
-)
+const appendixChapters = computed(() => {
+  if (!chapters || typeof chapters !== 'object') {
+    return []
+  }
+  
+  return Object.keys(chapters)
+    .filter(chapterKey => chapterKey.startsWith('ap'))
+    .map(chapterKey => {
+      const chapter = chapters[chapterKey]
+      const sections = chapter?.sections || {}
+      const sectionKeys = Object.keys(sections)
+      
+      return {
+        key: chapterKey,
+        title: chapter?.title || `付録 ${chapterKey}`,
+        sections: sectionKeys,
+        sectionData: sections,
+        uniqueSections: getUniqueSections(chapterKey) // 重複除去済みセクション
+      }
+    })
+})
 
-// 表示する章リスト（条件に応じて切り替え）
-const displayChapters = computed(() => 
-  isAppendixSection.value ? appendixChapters.value : regularChapters.value
-)
+// セクションタイトルを取得
+const getSectionTitle = (chapterKey, sectionKey) => {
+  const chapter = chapters[chapterKey]
+  const sectionData = chapter?.sections?.[sectionKey]
+  return sectionData?.title || `セクション ${sectionKey}`
+}
 
 // 次の章かどうかを判定
 const isNextChapter = (chapterKey) => {
   return props.nextChapter === chapterKey
 }
 
-// サイズ設定
+// サイズ設定に基づく動的スタイル
 const sizeConfigs = {
   xs: {
     columns: 4,
-    headerPadding: 'pt-3 pb-1 px-6',
-    headerTitle: 'text-lg',
-    mainPadding: 'px-6 py-6',
-    gridGap: 'gap-x-4 gap-y-4',
+    headerPadding: 'pt-6 pb-3 px-4 ',
+    headerTitle: 'text-2xl',
+    mainPadding: 'px-4 py-4',
+    gridGap: 'gap-x-4 gap-y-2',
     chapterNumber: 'text-2xl',
-    chapterTitle: 'text-[11px]',
-    chapterHeader: 'mb-2',
-    sectionList: 'mt-2 space-y-1',
-    sectionText: 'text-[9px]',
-    appendixNumber: 'text-xl',
-    nextBadge: 'mb-2 px-1.5 py-0.5 text-[8px]'
+    chapterTitle: 'text-sm font-bold',
+    chapterHeader: 'mb-1',
+    sectionList: 'ml-8 space-y-0.5',
+    sectionText: 'text-xs',
+    appendixNumber: 'text-lg',
+    nextBadge: 'px-1 py-0.5 text-xs'
   },
   sm: {
     columns: 3,
-    headerPadding: 'pt-6 pb-2 px-8',
-    headerTitle: 'text-xl',
-    mainPadding: 'px-8 py-8',
-    gridGap: 'gap-x-6 gap-y-5',
+    headerPadding: 'pt-8 pb-4 px-6',
+    headerTitle: 'text-3xl',
+    mainPadding: 'px-6 py-6',
+    gridGap: 'gap-x-6 gap-y-3',
     chapterNumber: 'text-3xl',
-    chapterTitle: 'text-xs',
-    chapterHeader: 'mb-2.5',
-    sectionList: 'mt-2.5 space-y-1',
-    sectionText: 'text-[10px]',
+    chapterTitle: 'text-base',
+    chapterHeader: 'mb-2',
+    sectionList: 'ml-10 space-y-1',
+    sectionText: 'text-sm',
     appendixNumber: 'text-2xl',
-    nextBadge: 'mb-2.5 px-2 py-0.5 text-[9px]'
+    nextBadge: 'px-2 py-1 text-xs'
   },
   md: {
     columns: 2,
-    headerPadding: 'pt-12 px-12',
-    headerTitle: 'text-3xl',
-    mainPadding: 'px-12 py-14',
-    gridGap: 'gap-x-12 gap-y-6',
+    headerPadding: 'pt-14 pb-8 px-10',
+    headerTitle: 'text-5xl',
+    mainPadding: 'px-6 py-40',
+    gridGap: 'gap-x-12 gap-y-2',
     chapterNumber: 'text-6xl',
     chapterTitle: 'text-2xl',
-    chapterHeader: 'mb-3',
-    sectionList: 'mt-3 space-y-1.5',
+    chapterHeader: 'mb-4',
+    sectionList: 'ml-20 space-y-2',
     sectionText: 'text-lg',
     appendixNumber: 'text-4xl',
-    nextBadge: 'mb-3 px-2.5 py-1 text-md'
+    nextBadge: 'px-3 py-1 text-sm'
   },
   lg: {
     columns: 2,
-    headerPadding: 'pt-8 pb-4 px-16',
-    headerTitle: 'text-4xl',
-    mainPadding: 'px-16 py-18',
-    gridGap: 'gap-x-16 gap-y-8',
+    headerPadding: 'pt-16 pb-10 px-12',
+    headerTitle: 'text-6xl',
+    mainPadding: 'px-16 py-16',
+    gridGap: 'gap-x-20 gap-y-10',
     chapterNumber: 'text-7xl',
-    chapterTitle: 'text-xl',
-    chapterHeader: 'mb-4',
-    sectionList: 'mt-4 space-y-2',
-    sectionText: 'text-base',
+    chapterTitle: 'text-3xl',
+    chapterHeader: 'mb-6',
+    sectionList: 'ml-24 space-y-3',
+    sectionText: 'text-xl',
     appendixNumber: 'text-5xl',
-    nextBadge: 'mb-4 px-3 py-1.5 text-xs'
+    nextBadge: 'px-4 py-2 text-base'
   },
   xl: {
     columns: 1,
-    headerPadding: 'pt-10 pb-5 px-20',
-    headerTitle: 'text-6xl',
-    mainPadding: 'px-20 py-24',
-    gridGap: 'gap-x-20 gap-y-12',
-    chapterNumber: 'text-8xl',
-    chapterTitle: 'text-3xl',
-    chapterHeader: 'mb-6',
-    sectionList: 'mt-6 space-y-3',
-    sectionText: 'text-xl',
+    headerPadding: 'pt-20 pb-12 px-16',
+    headerTitle: 'text-8xl',
+    mainPadding: 'px-20 py-20',
+    gridGap: 'gap-x-24 gap-y-12',
+    chapterNumber: 'text-9xl',
+    chapterTitle: 'text-5xl',
+    chapterHeader: 'mb-8',
+    sectionList: 'ml-32 space-y-4',
+    sectionText: 'text-3xl',
     appendixNumber: 'text-7xl',
-    nextBadge: 'mb-6 px-4 py-2 text-sm'
+    nextBadge: 'px-5 py-2 text-lg'
   }
 }
 
@@ -245,14 +314,24 @@ const currentConfig = computed(() => sizeConfigs[props.size])
 
 // 動的クラス
 const headerClasses = computed(() => `text-left ${currentConfig.value.headerPadding}`)
-const headerTitleClasses = computed(() => currentConfig.value.headerTitle)
+const headerTitleClasses = computed(() => `${currentConfig.value.headerTitle} font-bold text-white`)
 const mainContentClasses = computed(() => `flex-1 ${currentConfig.value.mainPadding}`)
 const gridClasses = computed(() => `grid grid-cols-${currentConfig.value.columns} ${currentConfig.value.gridGap}`)
+const chapterHeaderClasses = computed(() => `flex items-center ${currentConfig.value.chapterHeader} relative z-5`)
+const chapterNumberClasses = computed(() => `${currentConfig.value.chapterNumber} font-bold text-white mr-2`)
+const chapterTitleClasses = computed(() => `${currentConfig.value.chapterTitle} font-bold text-white`)
+const sectionListClasses = computed(() => currentConfig.value.sectionList)
+const sectionItemClasses = computed(() => 'flex items-start')
+const sectionTextClasses = computed(() => `text-white ${currentConfig.value.sectionText} leading-relaxed`)
+const appendixNumberClasses = computed(() => `${currentConfig.value.appendixNumber} font-bold text-white mr-6 pb-2`)
+const highlightBorderClasses = computed(() => 'absolute -inset-2 border-4 border-yellow-400 rounded-lg opacity-80')
+const nextBadgeClasses = computed(() => `absolute -top-2 -right-2 bg-yellow-400 text-black ${currentConfig.value.nextBadge} rounded-full font-bold z-10`)
 </script>
 
-<style scoped>
+<style>
 /* このコンポーネント専用のスタイル */
 .table-of-contents-container {
+  /* ページ全体をカバーする背景 */
   position: absolute !important;
   top: 0 !important;
   left: 50% !important;
@@ -264,15 +343,8 @@ const gridClasses = computed(() => `grid grid-cols-${currentConfig.value.columns
   z-index: 0 !important;
 }
 
-/* タイポグラフィの最適化 - Swiss Styleの核心 */
-div, span, h2, p {
-  font-feature-settings: "palt", "kern";
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* タブラーナンバーの最適化 */
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
+/* 背景色を確実に適用 */
+.table-of-contents-container.bg-theme-color {
+  background-color: rgba(2, 132, 199, 1) !important;
 }
 </style>

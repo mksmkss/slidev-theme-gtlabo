@@ -7,7 +7,7 @@
           <div 
             v-for="(chapter, index) in displayChapterList" 
             :key="chapter.key"
-            class="flex flex-col items-center min-w-35 py-1"
+            class="flex flex-col items-center min-w-30 py-1"
           >
             <!-- 章タイトル -->
             <div class="flex flex-1 text-md font-semibold text-gray-800 text-left w-full whitespace-nowrap mb-2">

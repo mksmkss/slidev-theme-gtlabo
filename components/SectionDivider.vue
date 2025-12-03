@@ -43,13 +43,16 @@
         <!-- 通常の目次表示 -->
         <div
           v-if="!isAppendixSection"
-          :class="gridClasses"
+          :class="layoutClasses"
         >
           <div 
             v-for="(chapter, index) in regularChapters" 
             :key="chapter.key"
-            class="flex flex-col "
-            :class="isNextChapter(chapter.key) ? 'border-sky-500 border-l-8 pl-6' : 'border-slate-200 border-l-4 pl-7'"
+            class="flex flex-col break-inside-avoid"
+            :class="[
+              isNextChapter(chapter.key) ? 'border-sky-500 border-l-8 pl-6' : 'border-slate-200 border-l-4 pl-7',
+              itemMarginBottomClasses
+            ]"
           >
             <!-- 次の章インジケーター - sky-500アクセント -->
             <div 
@@ -95,13 +98,16 @@
         <!-- 付録の目次表示 -->
         <div
           v-else
-          :class="gridClasses"
+          :class="layoutClasses"
         >
           <div 
             v-for="(chapter, index) in appendixChapters" 
             :key="chapter.key"
-            class="flex flex-col"
-            :class="isNextChapter(chapter.key) ? 'border-sky-500  border-l-8 pl-6' : 'border-slate-200 border-l-4 pl-7'"
+            class="flex flex-col break-inside-avoid"
+            :class="[
+              isNextChapter(chapter.key) ? 'border-sky-500  border-l-8 pl-6' : 'border-slate-200 border-l-4 pl-7',
+              itemMarginBottomClasses
+            ]"
           >
             <!-- 次の章インジケーター -->
             <div 
@@ -274,11 +280,12 @@ const isNextChapter = (chapterKey) => {
 // サイズ設定 - 縦幅を大幅削減
 const sizeConfigs = {
   xs: {
-    columns: 4,
+    columns: "columns-4",
     headerPadding: 'pt-3 pb-1 px-6',
     headerTitle: 'text-lg',
     mainPadding: 'px-6 py-6',
-    gridGap: 'gap-x-4 gap-y-4',
+    columnGap: 'gap-4',
+    itemMarginBottom: 'mb-4',
     chapterNumber: 'text-2xl',
     chapterTitle: 'text-[11px]',
     chapterHeader: 'mb-2',
@@ -288,11 +295,12 @@ const sizeConfigs = {
     nextBadge: 'mb-2 px-1.5 py-0.5 text-[8px]'
   },
   sm: {
-    columns: 3,
+    columns: "columns-3",
     headerPadding: 'pt-6 pb-2 px-8',
     headerTitle: 'text-xl',
     mainPadding: 'px-8 py-8',
-    gridGap: 'gap-x-6 gap-y-5',
+    columnGap: 'gap-6',
+    itemMarginBottom: 'mb-5',
     chapterNumber: 'text-3xl',
     chapterTitle: 'text-xs',
     chapterHeader: 'mb-2.5',
@@ -302,11 +310,12 @@ const sizeConfigs = {
     nextBadge: 'mb-2.5 px-2 py-0.5 text-[9px]'
   },
   md: {
-    columns: 2,
+    columns: "columns-2",
     headerPadding: 'pt-12 px-12',
     headerTitle: 'text-3xl',
     mainPadding: 'px-12 py-14',
-    gridGap: 'gap-x-12 gap-y-6',
+    columnGap: 'gap-12',
+    itemMarginBottom: 'mb-6',
     chapterNumber: 'text-6xl',
     chapterTitle: 'text-2xl',
     chapterHeader: 'mb-3',
@@ -316,11 +325,12 @@ const sizeConfigs = {
     nextBadge: 'mb-3 px-2.5 py-1 text-md'
   },
   lg: {
-    columns: 2,
+    columns: "columns-2",
     headerPadding: 'pt-8 pb-4 px-16',
     headerTitle: 'text-4xl',
     mainPadding: 'px-16 py-18',
-    gridGap: 'gap-x-16 gap-y-8',
+    columnGap: 'gap-16',
+    itemMarginBottom: 'mb-8',
     chapterNumber: 'text-7xl',
     chapterTitle: 'text-xl',
     chapterHeader: 'mb-4',
@@ -330,11 +340,12 @@ const sizeConfigs = {
     nextBadge: 'mb-4 px-3 py-1.5 text-xs'
   },
   xl: {
-    columns: 1,
+    columns: "columns-1",
     headerPadding: 'pt-10 pb-5 px-20',
     headerTitle: 'text-6xl',
     mainPadding: 'px-20 py-24',
-    gridGap: 'gap-x-20 gap-y-12',
+    columnGap: 'gap-20',
+    itemMarginBottom: 'mb-12',
     chapterNumber: 'text-8xl',
     chapterTitle: 'text-3xl',
     chapterHeader: 'mb-6',
@@ -351,7 +362,8 @@ const currentConfig = computed(() => sizeConfigs[props.size])
 const headerClasses = computed(() => `text-left ${currentConfig.value.headerPadding}`)
 const headerTitleClasses = computed(() => currentConfig.value.headerTitle)
 const mainContentClasses = computed(() => `flex-1 ${currentConfig.value.mainPadding}`)
-const gridClasses = computed(() => `grid grid-cols-${currentConfig.value.columns} ${currentConfig.value.gridGap}`)
+const layoutClasses = computed(() => `${currentConfig.value.columns} ${currentConfig.value.columnGap} block`)
+const itemMarginBottomClasses = computed(() => currentConfig.value.itemMarginBottom)
 const chapterHeaderClasses = computed(() => currentConfig.value.chapterHeader)
 const chapterNumberClasses = computed(() => currentConfig.value.chapterNumber)
 const chapterTitleClasses = computed(() => currentConfig.value.chapterTitle)

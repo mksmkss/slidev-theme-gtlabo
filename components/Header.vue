@@ -97,12 +97,25 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed ,inject } from 'vue'
 import { useSlideContext } from '@slidev/client'
 
 // Slidevコンテキストからconfigsにアクセス
 const { $slidev } = useSlideContext()
-const chapters = $slidev.configs.chapters || {}
+
+// 方法1: frontmatterから取得（従来通り）
+const frontmatterChapters = $slidev.configs.chapters || {}
+
+// 方法2: injectから取得（外部ファイル対応）
+const injectedChapters = inject('chapters', {})
+
+// 両方をマージ（frontmatter優先）
+const chapters = computed(() => ({
+  ...injectedChapters,
+  ...frontmatterChapters
+}))
+
+console.log('Header2.vue - chapters:', chapters.value)
 
 const props = defineProps({
   // タイトル用のプロパティ
@@ -133,28 +146,45 @@ const isSection = computed(() => {
 
 // タイトル表示用のデータ
 const displayData = computed(() => {
+  console.log('=== displayData 計算開始 ===')
+  console.log('props.chapterData:', props.chapterData)
+  console.log('props.currentSection:', props.currentSection)
+  console.log('props.chapter:', props.chapter)
+  console.log('props.currentChapter:', props.currentChapter)
+  console.log('chapters.value:', chapters.value)
+  
   // chapterDataが直接渡された場合はそれを使用
   if (props.chapterData) {
+    console.log('→ chapterData を使用')
     return props.chapterData
   }
   
   // currentSectionが指定されている場合、セクションデータを取得
   if (props.currentSection && (props.chapter || props.currentChapter)) {
     const chapterKey = props.chapter || props.currentChapter
-    const chapterData = chapters[chapterKey]
+    console.log('→ セクション検索: chapterKey =', chapterKey)
+    
+    const chapterData = chapters.value[chapterKey]
+    console.log('→ chapterData:', chapterData)
+    console.log('→ sections:', chapterData?.sections)
+    console.log('→ 検索するsection:', props.currentSection)
+    console.log('→ sectionData:', chapterData?.sections?.[props.currentSection])
+    
     if (chapterData?.sections?.[props.currentSection]) {
       return chapterData.sections[props.currentSection]
     }
+    console.log('→ セクションが見つかりません')
     return null
   }
   
   // chapterキーが渡された場合は内部データから取得
   const chapterKey = props.chapter || props.currentChapter
-  if (chapterKey && chapters[chapterKey]) {
-    return chapters[chapterKey]
+  if (chapterKey && chapters.value[chapterKey]) {
+    console.log('→ 章データを使用')
+    return chapters.value[chapterKey]
   }
   
-  // どちらも渡されなかった場合はnull
+  console.log('→ 何も見つかりません')
   return null
 })
 
@@ -172,14 +202,21 @@ const isCurrentPageAppendix = computed(() => {
 
 // 章リストを生成（refを除外し、appendixの表示を条件分岐）
 const chapterList = computed(() => {
-  if (!chapters || typeof chapters !== 'object') {
+  const chaptersData = chapters.value
+  console.log('=== chapterList 計算 ===')
+  console.log('chaptersData:', chaptersData)
+  console.log('typeof chaptersData:', typeof chaptersData)
+  console.log('Object.keys:', chaptersData ? Object.keys(chaptersData) : 'null')
+  
+  if (!chaptersData || typeof chaptersData !== 'object') {
+    console.log('→ chaptersData が無効')
     return []
   }
   
-  return Object.keys(chapters)
-    .filter(chapterKey => chapterKey !== 'ref') // refを除外
+  const result = Object.keys(chaptersData)
+    .filter(chapterKey => chapterKey !== 'ref')
     .map(chapterKey => {
-      const chapter = chapters[chapterKey]
+      const chapter = chaptersData[chapterKey]
       const sections = chapter?.sections || {}
       const sectionKeys = Object.keys(sections)
       
@@ -191,17 +228,26 @@ const chapterList = computed(() => {
         isAppendix: chapterKey.startsWith('ap')
       }
     })
+  
+  console.log('chapterList result:', result)
+  return result
 })
 
 // 表示する章リスト（appendixページかどうかで切り替え）
 const displayChapterList = computed(() => {
+  console.log('=== displayChapterList 計算 ===')
+  console.log('isCurrentPageAppendix:', isCurrentPageAppendix.value)
+  console.log('chapterList:', chapterList.value)
+  
+  let result
   if (isCurrentPageAppendix.value) {
-    // appendixページの場合はappendixのみ表示
-    return chapterList.value.filter(chapter => chapter.isAppendix)
+    result = chapterList.value.filter(chapter => chapter.isAppendix)
   } else {
-    // 通常ページの場合はappendixを除外
-    return chapterList.value.filter(chapter => !chapter.isAppendix)
+    result = chapterList.value.filter(chapter => !chapter.isAppendix)
   }
+  
+  console.log('displayChapterList result:', result)
+  return result
 })
 
 // appendixの開始ページを計算（SectionDivider考慮版）

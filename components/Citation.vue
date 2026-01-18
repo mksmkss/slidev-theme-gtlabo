@@ -1,34 +1,29 @@
 <template>
   <span>
     <!-- インライン引用番号 -->
-    <sup class="text-blue-600 font-semibold">
+    <sup class="text-blue-600 font-semibold cursor-help" :title="formattedCitation">
       [{{ citationNumber }}]
     </sup>
-    
-    <!-- このコンポーネント専用の引用情報表示エリア -->
-    <div 
-      v-if="shouldShowCitation"
-      class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-300 shadow-lg z-40 max-h-32 overflow-y-auto"
-      style="pointer-events: none;"
-    >
-      <div class="max-w-7xl mx-auto px-4 py-2">
-        <div class="space-y-1">
-          <div class="text-xs text-gray-800">
-            <span class="font-semibold">[{{ citationNumber }}]</span>
-            {{ formattedCitation }}
-          </div>
-        </div>
-      </div>
-    </div>
   </span>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, inject } from 'vue'
 import { useSlideContext } from '@slidev/client'
 
-const { $slidev } = useSlideContext()
-const citations = $slidev.configs.citations || {}
+const { $slidev, $page } = useSlideContext()
+
+// 方法1: frontmatterから取得（従来通り）
+const frontmatterCitations = $slidev.configs.citations || {}
+
+// 方法2: injectから取得（外部ファイル対応）
+const injectedCitations = inject('citations', {})
+
+// 両方をマージ（frontmatter優先）
+const citations = computed(() => ({
+  ...injectedCitations,
+  ...frontmatterCitations
+}))
 
 const props = defineProps({
   id: {
@@ -40,10 +35,23 @@ const props = defineProps({
 // グローバル引用管理の初期化
 if (!window.citationManager) {
   window.citationManager = {
-    citations: new Map(), // id -> { number, data, formatted }
-    citationKeys: Object.keys(citations), // frontmatterのキーの順番を保持
-    initialized: false
+    citations: new Map(),           // id -> { number, data, formatted }
+    citationKeys: [],               // frontmatterのキーの順番
+    pageCitations: new Map(),       // pageNumber -> Set of citation ids
+    initialized: false,
+    listeners: new Set()            // 更新通知用リスナー
   }
+}
+
+// 更新を通知する関数
+const notifyListeners = () => {
+  window.citationManager.listeners.forEach(listener => {
+    try {
+      listener()
+    } catch (e) {
+      // リスナーエラーを無視
+    }
+  })
 }
 
 // frontmatterの順番でcitation番号を事前に割り当て
@@ -55,7 +63,7 @@ const initializeCitations = () => {
       if (!window.citationManager.citations.has(key)) {
         const data = citations[key]
         const newCitation = {
-          number: index + 1, // 1から開始
+          number: index + 1,
           data: data,
           formatted: formatCitation(data)
         }
@@ -67,18 +75,9 @@ const initializeCitations = () => {
   }
 }
 
-const isMounted = ref(false)
-
-// 現在のページ番号を取得
-const currentPage = computed(() => {
-  const page = $slidev.nav.currentPage
-  return page
-})
-
 // 引用データを取得
 const citationData = computed(() => {
-  const data = citations[props.id] || null
-  return data
+  return citations[props.id] || null
 })
 
 // 引用番号を取得
@@ -87,7 +86,6 @@ const citationNumber = computed(() => {
     return '?'
   }
   
-  // 初期化を確実に実行
   initializeCitations()
   
   const citation = window.citationManager.citations.get(props.id)
@@ -112,12 +110,6 @@ const formattedCitation = computed(() => {
   return formatCitation(citationData.value)
 })
 
-// 引用を表示すべきかどうか
-const shouldShowCitation = computed(() => {
-  const shouldShow = isMounted.value && citationData.value !== null
-  return shouldShow
-})
-
 // 引用をフォーマット
 const formatCitation = (data) => {
   if (!data) {
@@ -126,22 +118,18 @@ const formatCitation = (data) => {
   
   let citation = ''
   
-  // 著者
   if (data.author) {
     citation += data.author
   }
   
-  // タイトル
   if (data.title) {
     citation += citation ? `, "${data.title}"` : `"${data.title}"`
   }
   
-  // ジャーナル
   if (data.journal) {
     citation += citation ? `, ${data.journal}` : data.journal
   }
   
-  // ボリューム・ナンバー
   if (data.volume && data.number) {
     citation += `, Vol. ${data.volume}, No. ${data.number}`
   } else if (data.volume) {
@@ -150,82 +138,77 @@ const formatCitation = (data) => {
     citation += `, No. ${data.number}`
   }
   
-  // ページ
   if (data.pages) {
     citation += `, pp. ${data.pages}`
   }
   
-  // 年
   if (data.year) {
     citation += citation ? ` (${data.year})` : data.year
   }
   
-  // 出版社
   if (data.publisher) {
     citation += citation ? `, ${data.publisher}` : data.publisher
   }
   
-  // URL
   if (data.url) {
     citation += citation ? `, ${data.url}` : data.url
   }
   
-  // ISSN
   if (data.issn) {
     citation += `, ISSN: ${data.issn}`
   }
   
-  const formatted = citation || '引用情報が不完全です'
-  return formatted
+  return citation || '引用情報が不完全です'
 }
 
-// 全体のグローバル状態をデバッグ出力
-const debugGlobalState = () => {
-  // デバッグ用（必要に応じてコメントアウト）
-}
-
-// コンポーネントのマウント時
-onMounted(() => {
-  isMounted.value = true
+// 現在のページに引用を登録
+const registerCitation = () => {
+  // $page はこのコンポーネントが配置されているスライドの番号（静的）
+  const page = $page
+  if (!page) return
   
-  // 初期化を確実に実行
-  initializeCitations()
-  
-  if (citationData.value) {
-    // 引用番号を取得（副作用でglobal stateに保存される）
-    const _ = citationNumber.value
-    debugGlobalState()
+  if (!window.citationManager.pageCitations.has(page)) {
+    window.citationManager.pageCitations.set(page, new Set())
   }
-})
-
-// コンポーネントのアンマウント時
-onUnmounted(() => {
-  isMounted.value = false
-  debugGlobalState()
-})
-
-// 開発用：グローバル状態確認用の関数をwindowに追加
-if (typeof window !== 'undefined') {
-  window.debugCitationState = debugGlobalState
+  
+  const pageSet = window.citationManager.pageCitations.get(page)
+  if (!pageSet.has(props.id)) {
+    pageSet.add(props.id)
+    notifyListeners()
+  }
 }
+
+// 現在のページから引用を解除
+const unregisterCitation = () => {
+  const page = $page
+  if (!page) return
+  
+  const pageSet = window.citationManager.pageCitations.get(page)
+  if (pageSet) {
+    pageSet.delete(props.id)
+    if (pageSet.size === 0) {
+      window.citationManager.pageCitations.delete(page)
+    }
+    notifyListeners()
+  }
+}
+
+onMounted(() => {
+  initializeCitations()
+  registerCitation()
+})
+
+onUnmounted(() => {
+  unregisterCitation()
+})
 </script>
 
 <style scoped>
-/* スクロールバーのスタイリング */
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+sup {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+  top: -0.5em;
 }
 </style>

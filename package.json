@@ -1,6 +1,6 @@
 {
   "name": "slidev-theme-gtlabo",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "A Slidev theme for laboratory presentations with customizable components",
   "author": "mksmkss",
   "license": "MIT",
@@ -16,8 +16,7 @@
     "styles",
     "setup",
     "uno.config.ts",
-    "index.js",
-    "slide-bottom.vue"
+    "index.js"
   ],
   "repository": {
     "type": "git",

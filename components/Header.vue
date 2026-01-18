@@ -97,7 +97,7 @@
 </template>
 
 <script setup>
-import { computed ,inject } from 'vue'
+import { computed, inject } from 'vue'
 import { useSlideContext } from '@slidev/client'
 
 // Slidevコンテキストからconfigsにアクセス
@@ -114,8 +114,6 @@ const chapters = computed(() => ({
   ...injectedChapters,
   ...frontmatterChapters
 }))
-
-console.log('Header2.vue - chapters:', chapters.value)
 
 const props = defineProps({
   // タイトル用のプロパティ
@@ -146,45 +144,27 @@ const isSection = computed(() => {
 
 // タイトル表示用のデータ
 const displayData = computed(() => {
-  console.log('=== displayData 計算開始 ===')
-  console.log('props.chapterData:', props.chapterData)
-  console.log('props.currentSection:', props.currentSection)
-  console.log('props.chapter:', props.chapter)
-  console.log('props.currentChapter:', props.currentChapter)
-  console.log('chapters.value:', chapters.value)
-  
   // chapterDataが直接渡された場合はそれを使用
   if (props.chapterData) {
-    console.log('→ chapterData を使用')
     return props.chapterData
   }
   
   // currentSectionが指定されている場合、セクションデータを取得
   if (props.currentSection && (props.chapter || props.currentChapter)) {
     const chapterKey = props.chapter || props.currentChapter
-    console.log('→ セクション検索: chapterKey =', chapterKey)
-    
     const chapterData = chapters.value[chapterKey]
-    console.log('→ chapterData:', chapterData)
-    console.log('→ sections:', chapterData?.sections)
-    console.log('→ 検索するsection:', props.currentSection)
-    console.log('→ sectionData:', chapterData?.sections?.[props.currentSection])
-    
     if (chapterData?.sections?.[props.currentSection]) {
       return chapterData.sections[props.currentSection]
     }
-    console.log('→ セクションが見つかりません')
     return null
   }
   
   // chapterキーが渡された場合は内部データから取得
   const chapterKey = props.chapter || props.currentChapter
   if (chapterKey && chapters.value[chapterKey]) {
-    console.log('→ 章データを使用')
     return chapters.value[chapterKey]
   }
   
-  console.log('→ 何も見つかりません')
   return null
 })
 
@@ -203,17 +183,11 @@ const isCurrentPageAppendix = computed(() => {
 // 章リストを生成（refを除外し、appendixの表示を条件分岐）
 const chapterList = computed(() => {
   const chaptersData = chapters.value
-  console.log('=== chapterList 計算 ===')
-  console.log('chaptersData:', chaptersData)
-  console.log('typeof chaptersData:', typeof chaptersData)
-  console.log('Object.keys:', chaptersData ? Object.keys(chaptersData) : 'null')
-  
   if (!chaptersData || typeof chaptersData !== 'object') {
-    console.log('→ chaptersData が無効')
     return []
   }
   
-  const result = Object.keys(chaptersData)
+  return Object.keys(chaptersData)
     .filter(chapterKey => chapterKey !== 'ref')
     .map(chapterKey => {
       const chapter = chaptersData[chapterKey]
@@ -228,26 +202,15 @@ const chapterList = computed(() => {
         isAppendix: chapterKey.startsWith('ap')
       }
     })
-  
-  console.log('chapterList result:', result)
-  return result
 })
 
 // 表示する章リスト（appendixページかどうかで切り替え）
 const displayChapterList = computed(() => {
-  console.log('=== displayChapterList 計算 ===')
-  console.log('isCurrentPageAppendix:', isCurrentPageAppendix.value)
-  console.log('chapterList:', chapterList.value)
-  
-  let result
   if (isCurrentPageAppendix.value) {
-    result = chapterList.value.filter(chapter => chapter.isAppendix)
+    return chapterList.value.filter(chapter => chapter.isAppendix)
   } else {
-    result = chapterList.value.filter(chapter => !chapter.isAppendix)
+    return chapterList.value.filter(chapter => !chapter.isAppendix)
   }
-  
-  console.log('displayChapterList result:', result)
-  return result
 })
 
 // appendixの開始ページを計算（SectionDivider考慮版）
@@ -255,64 +218,30 @@ const appendixStartPage = computed(() => {
   const totalPages = $slidev.nav.total
   const appendixChapters = chapterList.value.filter(chapter => chapter.isAppendix)
   
-  console.log('appendixStartPage計算:')
-  console.log('  totalPages:', totalPages)
-  console.log('  appendixChapters:', appendixChapters)
-  
   if (appendixChapters.length === 0) {
-    console.log('  appendixなし - 結果:', totalPages + 1)
-    return totalPages + 1 // appendixがない場合は存在しないページ番号を返す
+    return totalPages + 1
   }
   
   // appendixの実際のセクション数を計算
   const appendixSectionCount = appendixChapters.reduce((total, chapter) => {
-    const sectionCount = Math.max(1, chapter.sections.length)
-    console.log(`  章${chapter.key}: ${sectionCount}セクション`)
-    return total + sectionCount
+    return total + Math.max(1, chapter.sections.length)
   }, 0)
   
   // appendix用SectionDividerの数
   const appendixDividerCount = appendixChapters.length
   
-  console.log('  appendixSectionCount:', appendixSectionCount)
-  console.log('  appendixDividerCount:', appendixDividerCount)
-  
   // 全ページ数からappendixのセクション数とSectionDivider数を引いて開始位置を計算
-  const result = totalPages - appendixSectionCount - appendixDividerCount + 1
-  console.log('  appendixあり - 結果:', result)
-  return result
+  return totalPages - appendixSectionCount - appendixDividerCount + 1
 })
 
 // 調整されたページ総数（SectionDivider考慮版）
 const adjustedTotal = computed(() => {
-  // chapterList（全体）からappendixを検索
   const appendixChapters = chapterList.value.filter(chapter => chapter.isAppendix)
-  const normalChapters = chapterList.value.filter(chapter => !chapter.isAppendix && chapter.key !== 'ref')
-  
-  // SectionDividerの数を計算
-  const normalChapterDividers = normalChapters.length  // 通常章のSectionDivider数
-  const appendixChapterDividers = appendixChapters.length  // appendix章のSectionDivider数
-  const totalDividers = normalChapterDividers + appendixChapterDividers
-  
-  // デバッグ用ログ
-  console.log('全chapterList:', chapterList.value)
-  console.log('normalChapters:', normalChapters)
-  console.log('appendixChapters:', appendixChapters)
-  console.log('normalChapterDividers:', normalChapterDividers)
-  console.log('appendixChapterDividers:', appendixChapterDividers)
-  console.log('totalDividers:', totalDividers)
-  console.log('$slidev.nav.total:', $slidev.nav.total)
   
   if (appendixChapters.length === 0) {
-    // appendixがない場合は全体のページ数から表紙と
-    const result = $slidev.nav.total - 1 
-    console.log('appendixなし - 計算結果:', result)
-    return result
+    return $slidev.nav.total - 1
   } else {
-    // appendixがある場合はappendix開始前のページ数から表紙と通常章のSectionDividerを除く
-    const result = appendixStartPage.value - 2 
-    console.log('appendixあり - 計算結果:', result)
-    return result
+    return appendixStartPage.value - 2
   }
 })
 
@@ -355,7 +284,6 @@ const getSectionWidth = (totalSections) => {
 
 // 指定されたセクションが完了しているかチェック
 const isCompleted = (chapterIndex, sectionIndex) => {
-  // 参考文献ページの場合はすべて完了状態
   if (isReferencePage.value) {
     return true
   }
@@ -364,17 +292,12 @@ const isCompleted = (chapterIndex, sectionIndex) => {
   const currentSecIdx = currentSectionIndex.value
   
   if (currentIdx === -1) return false
-  
-  // 現在の章より前の章はすべて完了
   if (chapterIndex < currentIdx) return true
   
-  // 現在の章の場合
   if (chapterIndex === currentIdx) {
-    // セクションが指定されている場合
     if (currentSecIdx >= 0) {
       return sectionIndex < currentSecIdx
     }
-    // セクションが指定されていない場合は何も完了していない
     return false
   }
   
@@ -383,7 +306,6 @@ const isCompleted = (chapterIndex, sectionIndex) => {
 
 // 指定されたセクションが現在の位置かチェック
 const isCurrent = (chapterIndex, sectionIndex) => {
-  // 参考文献ページの場合は何も現在位置にしない（すべて完了状態）
   if (isReferencePage.value) {
     return false
   }
@@ -394,18 +316,15 @@ const isCurrent = (chapterIndex, sectionIndex) => {
   if (currentIdx === -1) return false
   if (chapterIndex !== currentIdx) return false
   
-  // セクションが指定されている場合
   if (currentSecIdx >= 0) {
     return sectionIndex === currentSecIdx
   }
   
-  // セクションが指定されていない場合は最初のセクションが現在位置
   return sectionIndex === 0
 }
 
 // 章全体が完了しているかチェック
 const isChapterCompleted = (chapterIndex) => {
-  // 参考文献ページの場合はすべて完了状態
   if (isReferencePage.value) {
     return true
   }

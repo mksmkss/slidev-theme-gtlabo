@@ -20,10 +20,18 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, onMounted, onUnmounted } from 'vue'
+import { ref, computed, inject, onMounted, onUnmounted, isRef } from 'vue'
 import { useSlideContext } from '@slidev/client'
 
 const { $slidev, $page } = useSlideContext()
+
+// $page を数値として取得するヘルパー
+const getPageNumber = () => {
+  if (isRef($page)) {
+    return $page.value
+  }
+  return $page
+}
 
 // 方法1: frontmatterから取得（従来通り）
 const frontmatterCitations = $slidev.configs.citations || {}
@@ -112,19 +120,12 @@ const getCitationNumber = (id) => {
 
 // 現在のページの引用リストを取得
 const currentCitations = computed(() => {
+  // updateTriggerを参照して再計算をトリガー
   const _ = updateTrigger.value
+  // citationsも参照してリアクティブにする
   const citationsData = citations.value
-  const page = $page
   
-  console.log('=== slide-bottom デバッグ ===')
-  console.log('$page:', page)
-  console.log('window.pageCitations:', window.pageCitations)
-  console.log('window.pageCitations.data:', window.pageCitations?.data)
-  console.log('has page?:', window.pageCitations?.data?.has(page))
-  
-  if (window.pageCitations?.data?.has(page)) {
-    console.log('pageSet:', [...window.pageCitations.data.get(page)])
-  }
+  const page = getPageNumber()
   
   if (!page || !window.pageCitations?.data?.has(page)) {
     return []
@@ -161,7 +162,7 @@ onMounted(() => {
   // 初期表示のために少し遅延して更新
   setTimeout(() => {
     updateTrigger.value++
-  }, 50)
+  }, 100)
 })
 
 onUnmounted(() => {

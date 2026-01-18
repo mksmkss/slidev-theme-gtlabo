@@ -8,10 +8,18 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, onUnmounted } from 'vue'
+import { computed, inject, onMounted, onUnmounted, isRef } from 'vue'
 import { useSlideContext } from '@slidev/client'
 
 const { $slidev, $page } = useSlideContext()
+
+// $page を数値として取得するヘルパー
+const getPageNumber = () => {
+  if (isRef($page)) {
+    return $page.value
+  }
+  return $page
+}
 
 // 方法1: frontmatterから取得（従来通り）
 const frontmatterCitations = $slidev.configs.citations || {}
@@ -129,13 +137,10 @@ const formatCitation = (data) => {
 
 // 現在のページに引用を登録（slide-bottom.vue用）
 const registerCitation = () => {
-  const page = $page
-  console.log('=== Citation registerCitation ===')
-  console.log('$page:', page)
-  console.log('props.id:', props.id)
+  const page = getPageNumber()
   
   if (!page) {
-    console.log('→ page が null')
+    console.warn('Citation: page is null or undefined')
     return
   }
   
@@ -148,13 +153,11 @@ const registerCitation = () => {
     pageSet.add(props.id)
     notifyListeners()
   }
-  console.log('→ 登録完了')
-  console.log('window.pageCitations.data:', [...window.pageCitations.data.entries()])
 }
 
 // 現在のページから引用を解除
 const unregisterCitation = () => {
-  const page = $page
+  const page = getPageNumber()
   if (!page) return
   
   const pageSet = window.pageCitations.data.get(page)

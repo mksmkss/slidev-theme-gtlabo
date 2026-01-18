@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, inject } from 'vue'
+import { computed, inject, onMounted, onUnmounted } from 'vue'
 import { useSlideContext } from '@slidev/client'
 
 const { $slidev, $page } = useSlideContext()
@@ -32,65 +32,37 @@ const props = defineProps({
   }
 })
 
-// グローバル引用管理の初期化
-if (!window.citationManager) {
-  window.citationManager = {
-    citations: new Map(),           // id -> { number, data, formatted }
-    citationKeys: [],               // frontmatterのキーの順番
-    pageCitations: new Map(),       // pageNumber -> Set of citation ids
-    initialized: false,
-    listeners: new Set()            // 更新通知用リスナー
+// ページごとの引用管理（slide-bottom.vue用）
+if (!window.pageCitations) {
+  window.pageCitations = {
+    data: new Map(),  // pageNumber -> Set of citation ids
+    listeners: new Set()
   }
 }
 
-// 更新を通知する関数
 const notifyListeners = () => {
-  window.citationManager.listeners.forEach(listener => {
-    try {
-      listener()
-    } catch (e) {
-      // リスナーエラーを無視
-    }
+  window.pageCitations.listeners.forEach(listener => {
+    try { listener() } catch (e) { /* ignore */ }
   })
-}
-
-// frontmatterの順番でcitation番号を事前に割り当て
-const initializeCitations = () => {
-  if (!window.citationManager.initialized) {
-    window.citationManager.citationKeys = Object.keys(citations)
-    
-    window.citationManager.citationKeys.forEach((key, index) => {
-      if (!window.citationManager.citations.has(key)) {
-        const data = citations[key]
-        const newCitation = {
-          number: index + 1,
-          data: data,
-          formatted: formatCitation(data)
-        }
-        window.citationManager.citations.set(key, newCitation)
-      }
-    })
-    
-    window.citationManager.initialized = true
-  }
 }
 
 // 引用データを取得
 const citationData = computed(() => {
-  return citations[props.id] || null
+  return citations.value[props.id] || null
 })
 
-// 引用番号を取得
+// 引用番号を取得（シンプル版：毎回計算）
 const citationNumber = computed(() => {
-  if (!citationData.value) {
+  const citationsData = citations.value
+  if (!citationsData || !citationData.value) {
     return '?'
   }
   
-  initializeCitations()
+  const keys = Object.keys(citationsData)
+  const index = keys.indexOf(props.id)
   
-  const citation = window.citationManager.citations.get(props.id)
-  if (citation) {
-    return citation.number
+  if (index >= 0) {
+    return index + 1
   }
   
   return '?'
@@ -101,12 +73,6 @@ const formattedCitation = computed(() => {
   if (!citationData.value) {
     return '引用情報が見つかりません'
   }
-  
-  const citation = window.citationManager.citations.get(props.id)
-  if (citation && citation.formatted) {
-    return citation.formatted
-  }
-  
   return formatCitation(citationData.value)
 })
 
@@ -161,17 +127,16 @@ const formatCitation = (data) => {
   return citation || '引用情報が不完全です'
 }
 
-// 現在のページに引用を登録
+// 現在のページに引用を登録（slide-bottom.vue用）
 const registerCitation = () => {
-  // $page はこのコンポーネントが配置されているスライドの番号（静的）
   const page = $page
   if (!page) return
   
-  if (!window.citationManager.pageCitations.has(page)) {
-    window.citationManager.pageCitations.set(page, new Set())
+  if (!window.pageCitations.data.has(page)) {
+    window.pageCitations.data.set(page, new Set())
   }
   
-  const pageSet = window.citationManager.pageCitations.get(page)
+  const pageSet = window.pageCitations.data.get(page)
   if (!pageSet.has(props.id)) {
     pageSet.add(props.id)
     notifyListeners()
@@ -183,18 +148,17 @@ const unregisterCitation = () => {
   const page = $page
   if (!page) return
   
-  const pageSet = window.citationManager.pageCitations.get(page)
+  const pageSet = window.pageCitations.data.get(page)
   if (pageSet) {
     pageSet.delete(props.id)
     if (pageSet.size === 0) {
-      window.citationManager.pageCitations.delete(page)
+      window.pageCitations.data.delete(page)
     }
     notifyListeners()
   }
 }
 
 onMounted(() => {
-  initializeCitations()
   registerCitation()
 })
 

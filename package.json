@@ -16,7 +16,8 @@
     "styles",
     "setup",
     "uno.config.ts",
-    "index.js"
+    "index.js",
+    "slide-bottom.vue"
   ],
   "repository": {
     "type": "git",

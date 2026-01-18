@@ -130,7 +130,14 @@ const formatCitation = (data) => {
 // 現在のページに引用を登録（slide-bottom.vue用）
 const registerCitation = () => {
   const page = $page
-  if (!page) return
+  console.log('=== Citation registerCitation ===')
+  console.log('$page:', page)
+  console.log('props.id:', props.id)
+  
+  if (!page) {
+    console.log('→ page が null')
+    return
+  }
   
   if (!window.pageCitations.data.has(page)) {
     window.pageCitations.data.set(page, new Set())
@@ -141,6 +148,8 @@ const registerCitation = () => {
     pageSet.add(props.id)
     notifyListeners()
   }
+  console.log('→ 登録完了')
+  console.log('window.pageCitations.data:', [...window.pageCitations.data.entries()])
 }
 
 // 現在のページから引用を解除

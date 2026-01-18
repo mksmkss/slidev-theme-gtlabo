@@ -1,3 +1,4 @@
+<!-- slide-bottom.vue -->
 <template>
   <div 
     v-if="currentCitations.length > 0"
@@ -111,12 +112,19 @@ const getCitationNumber = (id) => {
 
 // 現在のページの引用リストを取得
 const currentCitations = computed(() => {
-  // updateTriggerを参照して再計算をトリガー
   const _ = updateTrigger.value
-  // citationsも参照してリアクティブにする
   const citationsData = citations.value
-  
   const page = $page
+  
+  console.log('=== slide-bottom デバッグ ===')
+  console.log('$page:', page)
+  console.log('window.pageCitations:', window.pageCitations)
+  console.log('window.pageCitations.data:', window.pageCitations?.data)
+  console.log('has page?:', window.pageCitations?.data?.has(page))
+  
+  if (window.pageCitations?.data?.has(page)) {
+    console.log('pageSet:', [...window.pageCitations.data.get(page)])
+  }
   
   if (!page || !window.pageCitations?.data?.has(page)) {
     return []

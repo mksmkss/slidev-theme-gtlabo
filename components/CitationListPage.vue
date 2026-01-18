@@ -147,12 +147,23 @@
 </template>
   
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { useSlideContext } from '@slidev/client'
 
 // Slidevコンテキストからconfigsにアクセス
 const { $slidev } = useSlideContext()
-const citations = $slidev.configs.citations || {}
+
+// 方法1: frontmatterから取得（従来通り）
+const frontmatterCitations = $slidev.configs.citations || {}
+
+// 方法2: injectから取得（外部ファイル対応）
+const injectedCitations = inject('citations', {})
+
+// 両方をマージ（frontmatter優先）
+const citations = computed(() => ({
+  ...injectedCitations,
+  ...frontmatterCitations
+}))
 
 // プロパティ定義
 const props = defineProps({
@@ -177,16 +188,17 @@ const props = defineProps({
 
 // 参考文献リストを生成（frontmatterの順番を維持）
 const citationsList = computed(() => {
-  if (!citations || typeof citations !== 'object') {
+  const citationsData = citations.value
+  if (!citationsData || typeof citationsData !== 'object') {
     return []
   }
   
   // frontmatterの記述順でキーを取得
-  const originalKeys = Object.keys(citations)
+  const originalKeys = Object.keys(citationsData)
   
   const list = originalKeys.map((key, index) => ({
     key,
-    data: citations[key],
+    data: citationsData[key],
     number: index + 1 // frontmatterの順番に基づく番号
   }))
   

@@ -1,4 +1,4 @@
-<!-- components/TableOfContents.vue -->
+<!-- components/SectionDivider.vue -->
 <template>
   <div class="table-of-contents-container flex flex-col justify-start bg-white overflow-hidden relative">
     <!-- 厳密な背景グリッド - Swiss Styleの基礎 -->
@@ -160,12 +160,23 @@
 </template>
       
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { useSlideContext } from '@slidev/client'
 
 // Slidevコンテキストからconfigsにアクセス
 const { $slidev } = useSlideContext()
-const chapters = $slidev.configs.chapters || {}
+
+// 方法1: frontmatterから取得（従来通り）
+const frontmatterChapters = $slidev.configs.chapters || {}
+
+// 方法2: injectから取得（外部ファイル対応）
+const injectedChapters = inject('chapters', {})
+
+// 両方をマージ（frontmatter優先）
+const chapters = computed(() => ({
+  ...injectedChapters,
+  ...frontmatterChapters
+}))
 
 const props = defineProps({
   nextChapter: {
@@ -188,7 +199,8 @@ const props = defineProps({
 
 // セクションの重複を除去する関数
 const getUniqueSections = (chapterKey) => {
-  const chapter = chapters[chapterKey]
+  const chaptersData = chapters.value
+  const chapter = chaptersData[chapterKey]
   if (!chapter?.sections) return []
   
   const sections = chapter.sections
@@ -221,14 +233,15 @@ const isAppendixSection = computed(() => {
 
 // 通常の章リスト（refと付録を除外）
 const regularChapters = computed(() => {
-  if (!chapters || typeof chapters !== 'object') {
+  const chaptersData = chapters.value
+  if (!chaptersData || typeof chaptersData !== 'object') {
     return []
   }
   
-  return Object.keys(chapters)
+  return Object.keys(chaptersData)
     .filter(chapterKey => chapterKey !== 'ref' && !chapterKey.startsWith('ap'))
     .map(chapterKey => {
-      const chapter = chapters[chapterKey]
+      const chapter = chaptersData[chapterKey]
       const sections = chapter?.sections || {}
       const sectionKeys = Object.keys(sections)
       
@@ -244,14 +257,15 @@ const regularChapters = computed(() => {
 
 // 付録の章リスト
 const appendixChapters = computed(() => {
-  if (!chapters || typeof chapters !== 'object') {
+  const chaptersData = chapters.value
+  if (!chaptersData || typeof chaptersData !== 'object') {
     return []
   }
   
-  return Object.keys(chapters)
+  return Object.keys(chaptersData)
     .filter(chapterKey => chapterKey.startsWith('ap'))
     .map(chapterKey => {
-      const chapter = chapters[chapterKey]
+      const chapter = chaptersData[chapterKey]
       const sections = chapter?.sections || {}
       const sectionKeys = Object.keys(sections)
       
@@ -267,7 +281,8 @@ const appendixChapters = computed(() => {
 
 // セクションタイトルを取得
 const getSectionTitle = (chapterKey, sectionKey) => {
-  const chapter = chapters[chapterKey]
+  const chaptersData = chapters.value
+  const chapter = chaptersData[chapterKey]
   const sectionData = chapter?.sections?.[sectionKey]
   return sectionData?.title || `セクション ${sectionKey}`
 }

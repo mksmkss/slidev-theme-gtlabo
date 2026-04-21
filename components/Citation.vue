@@ -67,7 +67,7 @@ const apaInline = computed(() => {
   if (!citationData.value) return '(?)'
   const firstAuthor = citationData.value.first_author || '?'
   const year = citationData.value.year || '?'
-  return `(${firstAuthor} ${year})`
+  return `(${firstAuthor}, ${year})`
 })
 
 // スタイルに応じて表示テキストを切り替え

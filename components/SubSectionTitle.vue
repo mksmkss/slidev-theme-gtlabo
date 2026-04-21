@@ -12,7 +12,9 @@
       :class="textColorClass"
       :style="customTextStyle"
     >
-      {{ title }}
+      <!-- スロットがある場合はスロットを使用、ない場合はtitleプロパティを使用 -->
+      <slot v-if="$slots.default" />
+      <span v-else>{{ title }}</span>
     </h2>
   </div>
 </template>

@@ -2,6 +2,7 @@
   <component 
     :is="containerTag"
     :class="['math-text-container', containerClass]"
+    :style="eq ? 'position: relative; display: block;' : ''"
   >
     <!-- スロットが使われている場合 -->
     <template v-if="hasSlotContent">
@@ -72,11 +73,16 @@
         </div>
       </template>
     </template>
+
+    <!-- 数式番号 -->
+    <span v-if="eq && eqNumber !== null" class="eq-number">
+      ({{ eqNumber }})
+    </span>
   </component>
 </template>
 
 <script setup>
-import { computed, ref, onMounted, nextTick, watch, useSlots } from 'vue'
+import { computed, ref, onMounted, onUnmounted, nextTick, watch, useSlots, inject } from 'vue'
 
 const props = defineProps({
   text: {
@@ -103,36 +109,42 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  // シンプルモード（SimpleMathText相当）
   simple: {
     type: Boolean,
     default: false
   },
-  // Markdownを無効にする
   disableMarkdown: {
     type: Boolean,
     default: false
   },
-  // カスタム区切り文字パターン
   customDelimiters: {
     type: Array,
     default: null
+  },
+  eq: {
+    type: String,
+    default: null
   }
+})
+
+// 数式レジストリ
+const equationRegistry = inject('equationRegistry', null)
+
+const eqNumber = computed(() => {
+  if (!props.eq || !equationRegistry) return null
+  return equationRegistry.getNumber(props.eq)
 })
 
 const slots = useSlots()
 const mathElements = ref({})
 
-// スロットにコンテンツがあるかチェック
 const hasSlotContent = computed(() => {
   return slots.default && slots.default().length > 0
 })
 
-// テキストコンテンツを処理（Markdown + 改行 + HTMLエスケープ）
 const processTextContent = (content) => {
   if (!content) return ''
   
-  // まずHTMLエスケープ（数式とMarkdownは後で処理）
   let processed = content
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -140,56 +152,28 @@ const processTextContent = (content) => {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;')
   
-  // Markdownが有効な場合の処理
   if (!props.disableMarkdown) {
-    // リストアイテム（- で始まる行）
     processed = processed.replace(/^- (.+)$/gm, '<li>$1</li>')
-    
-    // 連続するliタグをulで囲む
     processed = processed.replace(/(<li>.*<\/li>(?:\n<li>.*<\/li>)*)/g, '<ul>$1</ul>')
-    
-    // 番号付きリスト（1. で始まる行）
     processed = processed.replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-    
-    // 連続する番号付きliタグをolで囲む（ulの後に処理）
     processed = processed.replace(/(<li>.*<\/li>(?:\n<li>.*<\/li>)*)/g, (match) => {
-      // 既にulで囲まれていない場合のみolで囲む
-      if (!match.includes('<ul>')) {
-        return '<ol>' + match + '</ol>'
-      }
+      if (!match.includes('<ul>')) return '<ol>' + match + '</ol>'
       return match
     })
-    
-    // 太字 **text** または __text__
     processed = processed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     processed = processed.replace(/__(.*?)__/g, '<strong>$1</strong>')
-    
-    // イタリック *text* または _text_（ただし数式の*は除外）
     processed = processed.replace(/(?<!\$[^$]*)\*([^*\n]+?)\*(?![^$]*\$)/g, '<em>$1</em>')
     processed = processed.replace(/(?<!\$[^$]*)_([^_\n]+?)_(?![^$]*\$)/g, '<em>$1</em>')
-    
-    // コードスパン `code`
     processed = processed.replace(/`([^`]+)`/g, '<code>$1</code>')
-    
-    // リンク [text](url)
     processed = processed.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-    
-    // 見出し ### text
     processed = processed.replace(/^### (.+)$/gm, '<h3>$1</h3>')
     processed = processed.replace(/^## (.+)$/gm, '<h2>$1</h2>')
     processed = processed.replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    
-    // 水平線 ---
     processed = processed.replace(/^---$/gm, '<hr>')
-    
-    // 引用 > text
     processed = processed.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
   }
   
-  // 改行を<br>タグに変換（ただし、HTMLタグの直後は除く）
   processed = processed.replace(/\n(?!<)/g, '<br>')
-  
-  // HTMLタグ間の不要な<br>を除去
   processed = processed.replace(/<\/([^>]+)><br><([^>\/][^>]*)>/g, '</$1><$2>')
   processed = processed.replace(/<\/li><br>/g, '</li>')
   processed = processed.replace(/<br><li>/g, '<li>')
@@ -201,7 +185,6 @@ const processTextContent = (content) => {
   return processed
 }
 
-// スロットの内容をテキストに変換（改良版）
 const slotTextContent = computed(() => {
   if (!hasSlotContent.value) return ''
   
@@ -209,42 +192,23 @@ const slotTextContent = computed(() => {
     if (typeof vnode === 'string') return vnode
     if (typeof vnode === 'number') return String(vnode)
     if (!vnode) return ''
-    
-    if (Array.isArray(vnode)) {
-      return vnode.map(extractTextFromVNode).join('')
-    }
-    
-    // テキストノードの処理
+    if (Array.isArray(vnode)) return vnode.map(extractTextFromVNode).join('')
     if (vnode.type === 'text' || vnode.type === Text || typeof vnode.children === 'string') {
       return vnode.children || vnode.text || ''
     }
-    
-    // 改行要素の処理
-    if (vnode.type === 'br') {
-      return '\n'
-    }
-    
-    // 子要素がある場合の再帰処理
-    if (Array.isArray(vnode.children)) {
-      return vnode.children.map(extractTextFromVNode).join('')
-    }
-    
-    // コンポーネントの場合はプレースホルダーを返す
+    if (vnode.type === 'br') return '\n'
+    if (Array.isArray(vnode.children)) return vnode.children.map(extractTextFromVNode).join('')
     if (typeof vnode.type === 'object' || typeof vnode.type === 'function') {
       return `<COMPONENT:${vnode.type.name || 'Unknown'}>`
     }
-    
     return vnode.children || ''
   }
   
-  const result = slots.default().map(extractTextFromVNode).join('')
-  return result
+  return slots.default().map(extractTextFromVNode).join('')
 })
 
-// デフォルトの区切り文字パターン
 const getDelimiters = () => {
   if (props.simple) {
-    // シンプルモード：$...$のみ
     return [
       { 
         pattern: /\$([^$\n]+)\$/g, 
@@ -255,35 +219,30 @@ const getDelimiters = () => {
   }
   
   return props.customDelimiters || [
-    // LaTeX環境（最優先）
     { 
       pattern: /\\begin\{(align\*?|equation\*?|gather\*?|multline\*?|split|eqnarray\*?|alignat\*?|flalign\*?)\}([\s\S]*?)\\end\{\1\}/g, 
       type: 'block-math',
       process: (match) => match[0],
       priority: 0
     },
-    // $$...$$（ブロック数式）
     { 
       pattern: /\$\$([^$]*(?:\$(?!\$)[^$]*)*)\$\$/g, 
       type: 'block-math',
       process: (match) => match[1].trim(),
       priority: 1
     },
-    // $...$（インライン数式）
     { 
       pattern: /\$([^$\n]+)\$/g, 
       type: 'inline-math',
       process: (match) => match[1].trim(),
       priority: 2
     },
-    // \(...\)（インライン数式）
     { 
       pattern: /\\\(([^)]+)\\\)/g, 
       type: 'inline-math',
       process: (match) => match[1].trim(),
       priority: 3
     },
-    // \[...\]（ブロック数式）
     { 
       pattern: /\\\[([^\]]+)\\\]/g, 
       type: 'block-math',
@@ -293,7 +252,6 @@ const getDelimiters = () => {
   ]
 }
 
-// テキストを解析してセグメントに分割
 const parseTextToSegments = (inputText) => {
   if (!inputText) return []
   
@@ -302,7 +260,6 @@ const parseTextToSegments = (inputText) => {
   let currentText = inputText
   const mathBlocks = []
   
-  // 全ての数式パターンを検出
   delimiters.forEach((delimiter, delimiterIndex) => {
     let match
     const regex = new RegExp(delimiter.pattern.source, delimiter.pattern.flags)
@@ -319,13 +276,11 @@ const parseTextToSegments = (inputText) => {
     }
   })
   
-  // 開始位置でソート、重複する場合は優先度で決定
   mathBlocks.sort((a, b) => {
     if (a.start !== b.start) return a.start - b.start
     return a.priority - b.priority
   })
   
-  // 重複する範囲を除去
   const filteredBlocks = []
   for (let i = 0; i < mathBlocks.length; i++) {
     const current = mathBlocks[i]
@@ -333,7 +288,6 @@ const parseTextToSegments = (inputText) => {
     
     for (let j = filteredBlocks.length - 1; j >= 0; j--) {
       const existing = filteredBlocks[j]
-      
       if (!(current.end <= existing.start || current.start >= existing.end)) {
         if (current.priority < existing.priority || 
            (current.priority === existing.priority && (current.end - current.start) > (existing.end - existing.start))) {
@@ -345,67 +299,43 @@ const parseTextToSegments = (inputText) => {
       }
     }
     
-    if (shouldAdd) {
-      filteredBlocks.push(current)
-    }
+    if (shouldAdd) filteredBlocks.push(current)
   }
   
   filteredBlocks.sort((a, b) => a.start - b.start)
   
-  // セグメントを構築
   let lastIndex = 0
   
   filteredBlocks.forEach(block => {
-    // 数式の前のテキスト部分
     if (block.start > lastIndex) {
       const textContent = currentText.slice(lastIndex, block.start)
       if (textContent) {
-        // 改行で分割してセグメントを作成
         const lines = textContent.split('\n')
         lines.forEach((line, lineIndex) => {
-          if (line || lineIndex === 0) { // 空行も最初の行なら保持
-            segments.push({
-              type: 'text',
-              content: line
-            })
+          if (line || lineIndex === 0) {
+            segments.push({ type: 'text', content: line })
           }
-          // 改行を追加（最後の行以外）
           if (lineIndex < lines.length - 1) {
-            segments.push({
-              type: 'text',
-              content: '\n'
-            })
+            segments.push({ type: 'text', content: '\n' })
           }
         })
       }
     }
     
-    // 数式部分
-    segments.push({
-      type: block.type,
-      content: block.content
-    })
-    
+    segments.push({ type: block.type, content: block.content })
     lastIndex = block.end
   })
   
-  // 残りのテキスト
   if (lastIndex < currentText.length) {
     const textContent = currentText.slice(lastIndex)
     if (textContent) {
       const lines = textContent.split('\n')
       lines.forEach((line, lineIndex) => {
         if (line || lineIndex === 0) {
-          segments.push({
-            type: 'text',
-            content: line
-          })
+          segments.push({ type: 'text', content: line })
         }
         if (lineIndex < lines.length - 1) {
-          segments.push({
-            type: 'text',
-            content: '\n'
-          })
+          segments.push({ type: 'text', content: '\n' })
         }
       })
     }
@@ -414,26 +344,20 @@ const parseTextToSegments = (inputText) => {
   return segments
 }
 
-// textプロパティから処理されたセグメント
 const processedTextSegments = computed(() => {
   if (!props.text) return []
   return parseTextToSegments(props.text)
 })
 
-// スロットから処理されたセグメント
 const processedSlotSegments = computed(() => {
   if (!hasSlotContent.value) return []
   return parseTextToSegments(slotTextContent.value)
 })
 
-// 数式要素の参照を設定
 const setMathElement = (key, el) => {
-  if (el) {
-    mathElements.value[key] = el
-  }
+  if (el) mathElements.value[key] = el
 }
 
-// 数式レンダリング
 const renderMathElements = async () => {
   await nextTick()
   
@@ -454,7 +378,6 @@ const renderMathElements = async () => {
               katex = katexModule.default || katexModule
               window.katex = katex
             } catch (e) {
-              // KaTeXが利用できない場合のフォールバック
               if (props.simple) {
                 element.innerHTML = `<span style="font-style: italic; color: #0066cc; background: #f0f8ff; padding: 1px 3px; border-radius: 3px;">${formula}</span>`
               } else {
@@ -490,20 +413,25 @@ const renderMathElements = async () => {
 }
 
 onMounted(() => {
+  if (props.eq && equationRegistry) {
+    equationRegistry.register(props.eq)
+  }
   renderMathElements()
+})
+
+onUnmounted(() => {
+  if (props.eq && equationRegistry) {
+    equationRegistry.unregister(props.eq)
+  }
 })
 
 watch([() => props.text, hasSlotContent], () => {
   mathElements.value = {}
-  nextTick(() => {
-    renderMathElements()
-  })
+  nextTick(() => renderMathElements())
 }, { flush: 'post' })
 
 watch([processedTextSegments, processedSlotSegments], () => {
-  nextTick(() => {
-    renderMathElements()
-  })
+  nextTick(() => renderMathElements())
 }, { flush: 'post' })
 </script>
 
@@ -531,7 +459,6 @@ watch([processedTextSegments, processedSlotSegments], () => {
   text-align: center;
 }
 
-/* KaTeX用の基本スタイリング */
 .inline-math-formula :deep(.katex),
 .block-math-formula :deep(.katex) {
   font-size: inherit !important;
@@ -546,12 +473,20 @@ watch([processedTextSegments, processedSlotSegments], () => {
   text-align: center;
 }
 
-/* シンプルモード用のフォールバックスタイル */
 .math-text-container.simple-mode .inline-math-formula {
   font-style: italic;
   color: #0066cc;
   background: #f0f8ff;
   padding: 1px 3px;
   border-radius: 3px;
+}
+
+.eq-number {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #374151;
+  font-size: 0.9em;
 }
 </style>

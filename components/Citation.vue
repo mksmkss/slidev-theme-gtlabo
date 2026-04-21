@@ -1,9 +1,15 @@
 <template>
   <span>
-    <!-- インライン引用番号 -->
-    <sup class="text-blue-600 font-semibold cursor-help" :title="formattedCitation">
-      [{{ citationNumber }}]
+    <sup v-if="citationStyle === 'numbered'"
+         class="text-blue-600 font-semibold cursor-help"
+         :title="formattedCitation">
+      {{ displayText }}
     </sup>
+    <span v-else
+          class="text-blue-600 font-semibold cursor-help"
+          :title="formattedCitation">
+      {{ displayText }}
+    </span>
   </span>
 </template>
 
@@ -13,141 +19,91 @@ import { useSlideContext } from '@slidev/client'
 
 const { $slidev, $page } = useSlideContext()
 
-// $page を数値として取得するヘルパー
 const getPageNumber = () => {
-  if (isRef($page)) {
-    return $page.value
-  }
+  if (isRef($page)) return $page.value
   return $page
 }
 
-// 方法1: frontmatterから取得（従来通り）
 const frontmatterCitations = $slidev.configs.citations || {}
-
-// 方法2: injectから取得（外部ファイル対応）
 const injectedCitations = inject('citations', {})
-
-// 両方をマージ（frontmatter優先）
 const citations = computed(() => ({
   ...injectedCitations,
   ...frontmatterCitations
 }))
 
+// slides.md の frontmatter から citationStyle を取得
+const citationStyle = $slidev.configs.citationStyle || 'numbered'
+
 const props = defineProps({
-  id: {
-    type: String,
-    required: true
-  }
+  id: { type: String, required: true }
 })
 
-// ページごとの引用管理（slide-bottom.vue用）
 if (!window.pageCitations) {
   window.pageCitations = {
-    data: new Map(),  // pageNumber -> Set of citation ids
+    data: new Map(),
     listeners: new Set()
   }
 }
 
 const notifyListeners = () => {
   window.pageCitations.listeners.forEach(listener => {
-    try { listener() } catch (e) { /* ignore */ }
+    try { listener() } catch (e) {}
   })
 }
 
-// 引用データを取得
-const citationData = computed(() => {
-  return citations.value[props.id] || null
-})
+const citationData = computed(() => citations.value[props.id] || null)
 
-// 引用番号を取得（シンプル版：毎回計算）
+// 番号形式: [1]
 const citationNumber = computed(() => {
   const citationsData = citations.value
-  if (!citationsData || !citationData.value) {
-    return '?'
-  }
-  
+  if (!citationsData || !citationData.value) return '?'
   const keys = Object.keys(citationsData)
   const index = keys.indexOf(props.id)
-  
-  if (index >= 0) {
-    return index + 1
-  }
-  
-  return '?'
+  return index >= 0 ? index + 1 : '?'
 })
 
-// フォーマットされた引用テキスト
+// APA インライン形式: (first_author, year)
+const apaInline = computed(() => {
+  if (!citationData.value) return '(?)'
+  const firstAuthor = citationData.value.first_author || '?'
+  const year = citationData.value.year || '?'
+  return `(${firstAuthor} ${year})`
+})
+
+// スタイルに応じて表示テキストを切り替え
+const displayText = computed(() => {
+  if (citationStyle === 'apa') return apaInline.value
+  return `[${citationNumber.value}]`
+})
+
 const formattedCitation = computed(() => {
-  if (!citationData.value) {
-    return '引用情報が見つかりません'
-  }
+  if (!citationData.value) return '引用情報が見つかりません'
   return formatCitation(citationData.value)
 })
 
-// 引用をフォーマット
 const formatCitation = (data) => {
-  if (!data) {
-    return '引用情報が見つかりません'
-  }
-  
+  if (!data) return '引用情報が見つかりません'
   let citation = ''
-  
-  if (data.author) {
-    citation += data.author
-  }
-  
-  if (data.title) {
-    citation += citation ? `, "${data.title}"` : `"${data.title}"`
-  }
-  
-  if (data.journal) {
-    citation += citation ? `, ${data.journal}` : data.journal
-  }
-  
-  if (data.volume && data.number) {
-    citation += `, Vol. ${data.volume}, No. ${data.number}`
-  } else if (data.volume) {
-    citation += `, Vol. ${data.volume}`
-  } else if (data.number) {
-    citation += `, No. ${data.number}`
-  }
-  
-  if (data.pages) {
-    citation += `, pp. ${data.pages}`
-  }
-  
-  if (data.year) {
-    citation += citation ? ` (${data.year})` : data.year
-  }
-  
-  if (data.publisher) {
-    citation += citation ? `, ${data.publisher}` : data.publisher
-  }
-  
-  if (data.url) {
-    citation += citation ? `, ${data.url}` : data.url
-  }
-  
-  if (data.issn) {
-    citation += `, ISSN: ${data.issn}`
-  }
-  
+  if (data.author) citation += data.author
+  if (data.title) citation += citation ? `, "${data.title}"` : `"${data.title}"`
+  if (data.journal) citation += citation ? `, ${data.journal}` : data.journal
+  if (data.volume && data.number) citation += `, Vol. ${data.volume}, No. ${data.number}`
+  else if (data.volume) citation += `, Vol. ${data.volume}`
+  else if (data.number) citation += `, No. ${data.number}`
+  if (data.pages) citation += `, pp. ${data.pages}`
+  if (data.year) citation += citation ? ` (${data.year})` : data.year
+  if (data.publisher) citation += citation ? `, ${data.publisher}` : data.publisher
+  if (data.url) citation += citation ? `, ${data.url}` : data.url
+  if (data.issn) citation += `, ISSN: ${data.issn}`
   return citation || '引用情報が不完全です'
 }
 
-// 現在のページに引用を登録（slide-bottom.vue用）
 const registerCitation = () => {
   const page = getPageNumber()
-  
-  if (!page) {
-    console.warn('Citation: page is null or undefined')
-    return
-  }
-  
+  if (!page) return
   if (!window.pageCitations.data.has(page)) {
     window.pageCitations.data.set(page, new Set())
   }
-  
   const pageSet = window.pageCitations.data.get(page)
   if (!pageSet.has(props.id)) {
     pageSet.add(props.id)
@@ -155,28 +111,19 @@ const registerCitation = () => {
   }
 }
 
-// 現在のページから引用を解除
 const unregisterCitation = () => {
   const page = getPageNumber()
   if (!page) return
-  
   const pageSet = window.pageCitations.data.get(page)
   if (pageSet) {
     pageSet.delete(props.id)
-    if (pageSet.size === 0) {
-      window.pageCitations.data.delete(page)
-    }
+    if (pageSet.size === 0) window.pageCitations.data.delete(page)
     notifyListeners()
   }
 }
 
-onMounted(() => {
-  registerCitation()
-})
-
-onUnmounted(() => {
-  unregisterCitation()
-})
+onMounted(() => registerCitation())
+onUnmounted(() => unregisterCitation())
 </script>
 
 <style scoped>

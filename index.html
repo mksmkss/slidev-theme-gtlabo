@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>slidev-theme-gtlabo — Specification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-title">slidev-theme<br/>-gtlabo</div>
+        <div class="brand-sub">SPEC · v2.3.1</div>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-heading">Getting Started <span class="chev">▾</span></div>
+      <ul class="nav-list">
+        <li><a href="#overview">Overview / 概要</a></li>
+        <li><a href="#install">Installation / インストール</a></li>
+        <li><a href="#quickstart">Quick Start</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-heading">Configuration <span class="chev">▾</span></div>
+      <ul class="nav-list">
+        <li><a href="#frontmatter">Frontmatter</a></li>
+        <li><a href="#chapters-config">Chapters / 章</a></li>
+        <li><a href="#citations-config">Citations / 引用</a></li>
+        <li><a href="#cover-config">Cover / 表紙設定</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-heading">Layouts <span class="chev">▾</span></div>
+      <ul class="nav-list">
+        <li><a href="#layout-cover">cover</a></li>
+        <li><a href="#layout-default">default</a></li>
+        <li><a href="#layout-intro">intro</a></li>
+        <li><a href="#layout-end">end</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-heading">Components <span class="chev">▾</span></div>
+      <ul class="nav-list">
+        <li><a href="#c-header">Header</a></li>
+        <li><a href="#c-sectiontitle">SectionTitle</a></li>
+        <li><a href="#c-subsectiontitle">SubSectionTitle</a></li>
+        <li><a href="#c-sectiondivider">SectionDivider</a></li>
+        <li><a href="#c-citation">Citation</a></li>
+        <li><a href="#c-citationlistpage">CitationListPage</a></li>
+        <li><a href="#c-mathtext">MathText</a></li>
+        <li><a href="#c-eqref">EqRef</a></li>
+        <li><a href="#c-alertbox">AlertBox</a></li>
+        <li><a href="#c-highlighttext">HighlightText</a></li>
+        <li><a href="#c-textcolorbox">TextColorBox</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-heading">Tools &amp; Recipes <span class="chev">▾</span></div>
+      <ul class="nav-list">
+        <li><a href="#bib2slidev">bib2slidev</a></li>
+        <li><a href="#workflow">Workflow / 制作フロー</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#styling">Styling / UnoCSS</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-section" style="margin-top:20px; padding:12px; background:#fff; border:1px solid var(--line); border-radius:6px;">
+      <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--sky-800); text-transform: uppercase; margin-bottom: 8px; font-weight: 700;">Font / 表示フォント</div>
+      <div style="display:flex; gap:6px;">
+        <button class="font-btn active" data-font="sans">Sans</button>
+        <button class="font-btn" data-font="serif">Serif</button>
+        <button class="font-btn" data-font="mono">Mono</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <main>
+
+    <!-- ========== HERO ========== -->
+    <section class="hero doc-section" id="overview">
+      <div class="hero-row">
+        <span class="tag">NPM · slidev-theme-gtlabo</span>
+        <span class="dot">●</span>
+        <span>v2.3.1</span>
+        <span class="dot">●</span>
+        <span>MIT License</span>
+        <span class="dot">●</span>
+        <span>Node ≥ 18</span>
+      </div>
+      <h1>slidev-theme-gtlabo</h1>
+      <p class="lede">
+        <span class="ja-en">
+          <span class="ja">学術発表・研究室ゼミ向けに設計された Slidev テーマ。引用管理、数式レンダリング、章構成プログレスバーを備える。</span>
+          <span class="en">A Slidev theme built for academic and laboratory-style presentations — with citation management, LaTeX rendering, and a chapter/section progress header.</span>
+        </span>
+      </p>
+
+      <div class="hero-meta">
+        <div class="cell"><span class="k">Package</span><span class="v">slidev-theme-gtlabo</span></div>
+        <div class="cell"><span class="k">Author</span><span class="v">mksmkss</span></div>
+        <div class="cell"><span class="k">Aspect Ratio</span><span class="v">4 / 3</span></div>
+        <div class="cell"><span class="k">Color Scheme</span><span class="v">Light · Sky</span></div>
+        <div class="cell"><span class="k">Default Sans</span><span class="v">Nunito Sans</span></div>
+        <div class="cell"><span class="k">Default Mono</span><span class="v">Fira Code</span></div>
+        <div class="cell"><span class="k">Math Engine</span><span class="v">KaTeX</span></div>
+        <div class="cell"><span class="k">Icon Set</span><span class="v">Lucide</span></div>
+      </div>
+
+      <h3>What it provides / 提供する機能</h3>
+      <ul>
+        <li><strong>4 レイアウト</strong> — <code>cover</code>, <code>default</code>, <code>intro</code>, <code>end</code></li>
+        <li><strong>11 コンポーネント</strong> — 引用管理・数式表示・章ヘッダー・アラート・ハイライト等</li>
+        <li><strong>章/節プログレス</strong> — <code>chapters</code> 構造を frontmatter に定義するだけで現在位置を自動描画</li>
+        <li><strong>BibTeX コンバータ</strong> — <code>dev/bib2slidev.ipynb</code> による BibTeX → frontmatter 変換</li>
+        <li><strong>UnoCSS 拡張</strong> — <code>theme-color</code> / <code>text-main</code> カスタムトークン</li>
+      </ul>
+    </section>
+
+    <!-- ========== INSTALL ========== -->
+    <section class="doc-section" id="install">
+      <h2><span class="num">01</span> Installation<span class="en-label"> / インストール</span></h2>
+      <p>Slidev 本体がインストールされた状態で、テーマを npm/pnpm からインストールします。<span class="en">Install the theme via your package manager alongside Slidev.</span></p>
+
+      <div class="code-wrap" data-lang="bash">
+        <div class="code-head"><span class="lang">bash</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-c"># npm</span>
+npm install slidev-theme-gtlabo
+
+<span class="tok-c"># pnpm</span>
+pnpm add slidev-theme-gtlabo
+
+<span class="tok-c"># yarn</span>
+yarn add slidev-theme-gtlabo</code></pre>
+      </div>
+
+      <p><code>slides.md</code> の frontmatter にテーマを指定します。Slidev を起動するとプロンプトで自動インストールを提案する挙動もあります。</p>
+
+      <div class="code-wrap" data-lang="markdown">
+        <div class="code-head"><span class="lang">slides.md</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-p">---</span>
+<span class="tok-a">theme</span>: <span class="tok-s">slidev-theme-gtlabo</span>
+<span class="tok-p">---</span></code></pre>
+      </div>
+
+      <div class="callout info">
+        <strong>依存関係 / Dependencies:</strong> Vue 3 · Slidev CLI · UnoCSS · KaTeX · Lucide Icons。
+        KaTeX は <code>MathText</code> / <code>EqRef</code> 使用時に動的 import されます。
+      </div>
+    </section>
+
+    <!-- ========== QUICK START ========== -->
+    <section class="doc-section" id="quickstart">
+      <h2><span class="num">02</span> Quick Start<span class="en-label"> / はじめの一枚</span></h2>
+      <p>最小構成の <code>slides.md</code> 例です。<code>cover</code> → <code>default</code> → <code>end</code> の 3 枚を作ります。</p>
+
+      <div class="code-wrap" data-lang="markdown">
+        <div class="code-head"><span class="lang">slides.md</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-p">---</span>
+<span class="tok-a">theme</span>: <span class="tok-s">slidev-theme-gtlabo</span>
+<span class="tok-a">meetingName</span>: <span class="tok-s">研究室ゼミ #12</span>
+<span class="tok-a">date</span>: <span class="tok-s">2026-05-14</span>
+<span class="tok-a">coverTitle</span>:
+  <span class="tok-a">first</span>: <span class="tok-s">異常検知の近年動向</span>
+  <span class="tok-a">second</span>: <span class="tok-s">One-Class Neural Networks</span>
+<span class="tok-a">author</span>:
+  <span class="tok-a">name</span>: <span class="tok-s">山田 太郎</span>
+  <span class="tok-a">affiliation</span>: <span class="tok-s">XXX研究室</span>
+<span class="tok-a">layout</span>: <span class="tok-s">cover</span>
+<span class="tok-p">---</span>
+
+<span class="tok-p">---</span>
+<span class="tok-a">layout</span>: <span class="tok-s">default</span>
+<span class="tok-p">---</span>
+
+&lt;Header :chapter-data="{ title: 'はじめに' }" chapter="intro" /&gt;
+
+本日の内容を紹介します。
+
+<span class="tok-p">---</span>
+<span class="tok-a">layout</span>: <span class="tok-s">end</span>
+<span class="tok-p">---</span></code></pre>
+      </div>
+
+      <div class="callout tip">
+        <strong>ローカル開発:</strong> <code>npm run dev</code> で <code>example.md</code> のプレビュー、<code>npm run export</code> で PDF 出力、<code>npm run screenshot</code> で PNG 出力ができます。
+      </div>
+    </section>
+
+    <!-- ========== FRONTMATTER ========== -->
+    <section class="doc-section" id="frontmatter">
+      <h2><span class="num">03</span> Frontmatter Configuration<span class="en-label"> / 全体設定</span></h2>
+      <p>このテーマは <code>$slidev.configs</code> 経由で多数のキーを読み取ります。<span class="en">The theme consumes numerous top-level keys from the slides' head frontmatter.</span></p>
+
+      <ul class="kv-list">
+        <li><span class="k">theme</span><span>必ず <code>slidev-theme-gtlabo</code></span></li>
+        <li><span class="k">meetingName</span><span>発表の場の名前（表紙上部に表示） / Meeting title shown on cover</span></li>
+        <li><span class="k">date</span><span>日付文字列（自由フォーマット） / Free-form date string</span></li>
+        <li><span class="k">coverTitle</span><span>表紙タイトル。<code>{first, second}</code> オブジェクト or 配列 / cover title as object or array of lines</span></li>
+        <li><span class="k">titleSize</span><span><code>small</code>/<code>medium</code>/<code>large</code>/<code>xlarge</code>/<code>xxlarge</code>（既定 <code>large</code>）</span></li>
+        <li><span class="k">author</span><span><code>{name, affiliation}</code>。presenter 情報 / primary presenter</span></li>
+        <li><span class="k">coAuthors</span><span><code>[{name, affiliation}, ...]</code>（最大 4 名表示）</span></li>
+        <li><span class="k">chapters</span><span>章/節の定義オブジェクト（§<a href="#chapters-config">3.1</a>）</span></li>
+        <li><span class="k">citations</span><span>参考文献辞書（§<a href="#citations-config">3.2</a>）</span></li>
+        <li><span class="k">citationStyle</span><span><code>numbered</code>（既定）または <code>apa</code></span></li>
+        <li><span class="k">thankYouMessage</span><span>end レイアウトの副文（既定「ご清聴ありがとうございました」）</span></li>
+        <li><span class="k">contact</span><span><code>{email, twitter}</code>。end レイアウトに表示</span></li>
+      </ul>
+
+      <!-- Chapters -->
+      <h3 id="chapters-config">3.1 <code>chapters</code> / 章・節構造</h3>
+      <p>進捗バー (<code>Header</code>) と目次 (<code>SectionDivider</code>) が共有するデータ構造です。<code>ref</code> キーは参考文献ページ専用で進捗バーから除外されます。<code>ap</code> で始まるキーは <strong>付録（Appendix）</strong> として扱われ、通常章とは別のグループで描画されます。</p>
+
+      <div class="callout info">
+        <strong>推奨配置 / Recommended location:</strong>
+        章構造は <code>slides.md</code> の frontmatter に直接書くのではなく、<strong>スライドプロジェクト直下に <code>data/chapters.yaml</code> を作成してそちらに記述</strong>することを推奨します（<code>data/citations.yaml</code> と同様）。
+        <code>slides.md</code> の frontmatter では <code>chapters: !include data/chapters.yaml</code> のように外部参照するか、ビルド前に結合します。
+        章立ての改訂と本文編集の差分を分離でき、複数スライド間で章テンプレートを使い回すのも容易になります。<br/>
+        <span class="en">Keep the chapter structure in <code>data/chapters.yaml</code> at the root of your slide project rather than inline in the frontmatter — this isolates structural changes from content edits and makes chapter templates reusable across decks.</span>
+      </div>
+
+      <div class="code-wrap" data-lang="text">
+        <div class="code-head"><span class="lang">project layout</span><button class="copy-btn">Copy</button></div>
+<pre><code>my-slides/
+├─ slides.md
+├─ data/
+│  ├─ chapters.yaml      <span class="tok-c"># ← 章・節構造はここに</span>
+│  └─ citations.yaml     <span class="tok-c"># ← 参考文献はここに</span>
+├─ components/
+└─ package.json</code></pre>
+      </div>
+
+      <p>以下は <code>data/chapters.yaml</code>（もしくは frontmatter に直接書いた場合の <code>chapters:</code> 以下）の例です。</p>
+
+      <div class="code-wrap" data-lang="yaml">
+        <div class="code-head"><span class="lang">yaml</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-a">chapters</span>:
+  <span class="tok-a">intro</span>:
+    <span class="tok-a">title</span>: <span class="tok-s">はじめに</span>
+    <span class="tok-a">sections</span>:
+      <span class="tok-a">overview</span>:
+        <span class="tok-a">title</span>: <span class="tok-s">概要</span>
+      <span class="tok-a">objectives</span>:
+        <span class="tok-a">title</span>: <span class="tok-s">目的</span>
+  <span class="tok-a">method</span>:
+    <span class="tok-a">title</span>: <span class="tok-s">提案手法</span>
+    <span class="tok-a">sections</span>:
+      <span class="tok-a">approach</span>: { <span class="tok-a">title</span>: <span class="tok-s">アプローチ</span> }
+      <span class="tok-a">impl</span>:     { <span class="tok-a">title</span>: <span class="tok-s">実装</span> }
+  <span class="tok-a">ap1</span>:                     <span class="tok-c"># 付録</span>
+    <span class="tok-a">title</span>: <span class="tok-s">数式の導出</span>
+    <span class="tok-a">sections</span>:
+      <span class="tok-a">lemma</span>: { <span class="tok-a">title</span>: <span class="tok-s">補題</span> }
+  <span class="tok-a">ref</span>:                     <span class="tok-c"># 参考文献ページ専用</span>
+    <span class="tok-a">title</span>: <span class="tok-s">参考文献</span></code></pre>
+      </div>
+
+      <div class="callout warn">
+        <strong>キー命名ルール:</strong>
+        <ul style="margin:6px 0 0 0;">
+          <li><code>ref</code> → 参考文献。<code>Header</code> の進捗バーから除外される。</li>
+          <li><code>ap</code> / <code>ap1</code> / <code>apA</code> … → 付録。接頭辞 <code>ap</code> で自動判定。</li>
+          <li>それ以外 → 通常章。定義順でインデックスが振られる。</li>
+        </ul>
+      </div>
+
+      <!-- Citations -->
+      <h3 id="citations-config">3.2 <code>citations</code> / 参考文献</h3>
+      <p>辞書形式で定義します。キーが <code>&lt;Citation id="…"/&gt;</code> から参照される ID、値が書誌情報オブジェクトです。</p>
+
+      <div class="callout info">
+        <strong>推奨配置 / Recommended location:</strong>
+        参考文献は <code>slides.md</code> の frontmatter に直接書くのではなく、<strong>スライドプロジェクト直下に <code>data/citations.yaml</code> を作成してそちらに記述</strong>することを推奨します。
+        <code>slides.md</code> の frontmatter では <code>citations: !include data/citations.yaml</code> のように外部参照するか、ビルド前に結合します。
+        これにより <code>bib2slidev</code> で生成した YAML をそのまま貼れて、スライド本体の差分と参考文献の差分を分離できます。<br/>
+        <span class="en">Put your bibliography in <code>data/citations.yaml</code> at the root of your slide project rather than inline in the frontmatter — this keeps <code>slides.md</code> diffs focused on content and lets you paste <code>bib2slidev</code> output directly into a dedicated file.</span>
+      </div>
+
+      <div class="code-wrap" data-lang="text">
+        <div class="code-head"><span class="lang">project layout</span><button class="copy-btn">Copy</button></div>
+<pre><code>my-slides/
+├─ slides.md
+├─ data/
+│  └─ citations.yaml     <span class="tok-c"># ← 参考文献はここに集約</span>
+├─ components/
+└─ package.json</code></pre>
+      </div>
+
+      <div class="code-wrap" data-lang="yaml">
+        <div class="code-head"><span class="lang">data/citations.yaml</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-a">smith2023</span>:
+  <span class="tok-a">author</span>: <span class="tok-s">"Smith, J. and Lee, H."</span>
+  <span class="tok-a">first_author</span>: <span class="tok-s">"Smith"</span>
+  <span class="tok-a">title</span>:  <span class="tok-s">"Research on AI"</span>
+  <span class="tok-a">journal</span>: <span class="tok-s">"Journal of AI"</span>
+  <span class="tok-a">year</span>:   <span class="tok-s">"2023"</span>
+
+<span class="tok-a">chalapathy2019</span>:
+  <span class="tok-a">author</span>: <span class="tok-s">"Chalapathy, R. et al."</span>
+  <span class="tok-a">first_author</span>: <span class="tok-s">"Chalapathy"</span>
+  <span class="tok-a">title</span>:  <span class="tok-s">"Anomaly Detection using One-Class Neural Networks"</span>
+  <span class="tok-a">journal</span>: <span class="tok-s">"arXiv preprint"</span>
+  <span class="tok-a">year</span>:   <span class="tok-s">"2019"</span>
+  <span class="tok-a">url</span>:    <span class="tok-s">"https://arxiv.org/abs/1802.06360"</span></code></pre>
+      </div>
+
+      <p>次に示すのはフロントマターに直接書いた場合の形（等価）です。<code>data/citations.yaml</code> に切り出した場合も、キーと書誌フィールドの構造は全く同じです。</p>
+
+      <div class="code-wrap" data-lang="yaml">
+        <div class="code-head"><span class="lang">yaml</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-a">citations</span>:
+  <span class="tok-a">smith2023</span>:
+    <span class="tok-a">author</span>: <span class="tok-s">"Smith, J. and Lee, H."</span>
+    <span class="tok-a">first_author</span>: <span class="tok-s">"Smith"</span>        <span class="tok-c"># APA 表示で使用</span>
+    <span class="tok-a">title</span>:  <span class="tok-s">"Research on AI"</span>
+    <span class="tok-a">journal</span>: <span class="tok-s">"Journal of AI"</span>
+    <span class="tok-a">volume</span>: <span class="tok-s">"42"</span>
+    <span class="tok-a">number</span>: <span class="tok-s">"3"</span>
+    <span class="tok-a">pages</span>:  <span class="tok-s">"112--130"</span>
+    <span class="tok-a">year</span>:   <span class="tok-s">"2023"</span>
+    <span class="tok-a">doi</span>:    <span class="tok-s">"10.1000/example"</span>
+    <span class="tok-a">url</span>:    <span class="tok-s">"https://example.org"</span>
+    <span class="tok-a">issn</span>:   <span class="tok-s">"1234-5678"</span>
+    <span class="tok-a">publisher</span>: <span class="tok-s">"Academic Press"</span></code></pre>
+      </div>
+
+      <h4>サポートされる書誌フィールド</h4>
+      <table class="prop-table">
+        <thead><tr><th>Field</th><th>Type</th><th>用途 / Used by</th></tr></thead>
+        <tbody>
+          <tr><td><code>author</code></td><td class="type">string</td><td>著者（<code>" and "</code> 区切り推奨）</td></tr>
+          <tr><td><code>first_author</code></td><td class="type">string</td><td>APA スタイル時のインライン表示</td></tr>
+          <tr><td><code>title</code></td><td class="type">string</td><td>論文/記事タイトル</td></tr>
+          <tr><td><code>journal</code></td><td class="type">string</td><td>ジャーナル名</td></tr>
+          <tr><td><code>volume</code> / <code>number</code> / <code>pages</code></td><td class="type">string</td><td>巻号ページ</td></tr>
+          <tr><td><code>year</code></td><td class="type">string</td><td>発行年</td></tr>
+          <tr><td><code>publisher</code></td><td class="type">string</td><td>出版社</td></tr>
+          <tr><td><code>doi</code></td><td class="type">string</td><td>DOI（優先してリンク化）</td></tr>
+          <tr><td><code>url</code></td><td class="type">string</td><td>URL（<code>doi</code> 未指定時にリンク化）</td></tr>
+          <tr><td><code>issn</code></td><td class="type">string</td><td>ISSN 表記</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Cover -->
+      <h3 id="cover-config">3.3 表紙/著者情報の設定</h3>
+      <div class="code-wrap" data-lang="yaml">
+        <div class="code-head"><span class="lang">yaml</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-a">meetingName</span>: <span class="tok-s">情報処理学会 全国大会</span>
+<span class="tok-a">date</span>: <span class="tok-s">2026.05.14</span>
+<span class="tok-a">titleSize</span>: <span class="tok-s">large</span>
+<span class="tok-a">coverTitle</span>:
+  <span class="tok-a">first</span>:  <span class="tok-s">異常検知における</span>
+  <span class="tok-a">second</span>: <span class="tok-s">One-Class Neural Networks</span>
+<span class="tok-c"># あるいは配列で複数行</span>
+<span class="tok-c"># coverTitle:</span>
+<span class="tok-c">#   - "異常検知における"</span>
+<span class="tok-c">#   - "One-Class Neural Networks"</span>
+<span class="tok-a">author</span>:
+  <span class="tok-a">name</span>: <span class="tok-s">山田 太郎</span>
+  <span class="tok-a">affiliation</span>: <span class="tok-s">XXX研究室</span>
+<span class="tok-a">coAuthors</span>:
+  - { <span class="tok-a">name</span>: <span class="tok-s">佐藤 花子</span>, <span class="tok-a">affiliation</span>: <span class="tok-s">XXX研究室</span> }
+  - { <span class="tok-a">name</span>: <span class="tok-s">鈴木 次郎</span>, <span class="tok-a">affiliation</span>: <span class="tok-s">XXX研究室</span> }
+<span class="tok-a">contact</span>:
+  <span class="tok-a">email</span>:   <span class="tok-s">yamada@example.ac.jp</span>
+  <span class="tok-a">twitter</span>: <span class="tok-s">@yamada</span>
+<span class="tok-a">thankYouMessage</span>: <span class="tok-s">ご清聴ありがとうございました</span></code></pre>
+      </div>
+    </section>
+
+
+    <!-- ============== LAYOUTS ============== -->
+    <section class="doc-section" id="layouts">
+      <h2><span class="num">04</span> Layouts<span class="en-label"> / レイアウト</span></h2>
+      <p><code>---\nlayout: xxx\n---</code> で各スライドに指定します。<span class="en">Specify each slide's layout via frontmatter.</span></p>
+
+      <!-- cover -->
+      <section id="layout-cover" style="padding-top:24px;">
+        <h3><code>cover</code> <span class="badge sky">Layout</span></h3>
+        <p>プレゼンテーションの表紙。<code>meetingName</code>, <code>date</code>, <code>coverTitle</code>, <code>author</code>, <code>coAuthors</code> を自動で組版します。Swiss Style のグリッドと非対称なアクセント、マウント後のアニメーションが入ります。</p>
+
+        <div class="preview">
+          <div class="preview-head"><span class="label">LIVE PREVIEW — layout: cover</span><span>4:3 aspect (mini)</span></div>
+          <div class="preview-body tight">
+            <div class="pv-cover">
+              <div class="strip"></div>
+              <div class="strip-accent"></div>
+              <div class="strip-sky"></div>
+              <div class="strip-bar"></div>
+              <div class="pv-cover-inner">
+                <div class="tag">
+                  <div class="bar"></div>
+                  <div class="meeting">情報処理学会 全国大会</div>
+                  <div class="date">2026.05.14</div>
+                </div>
+                <div class="big">
+                  <span>異常検知における</span>
+                  <span class="l2">One-Class Neural Networks</span>
+                </div>
+                <div class="authors">
+                  <div>
+                    <div class="k">Presenter</div>
+                    <div class="name">山田 太郎</div>
+                    <div class="aff">XXX研究室</div>
+                  </div>
+                  <div>
+                    <div class="k">Co-Authors</div>
+                    <div class="name" style="font-size:14px;">佐藤 花子</div>
+                    <div class="aff">XXX研究室</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- default -->
+      <section id="layout-default" style="padding-top:24px;">
+        <h3><code>default</code> <span class="badge sky">Layout</span></h3>
+        <p>通常スライド用。<code>bg-white</code> 白背景、<code>text-main</code> カラー、Flex 縦並び、<code>text-xl</code> 基準。<br/><span class="en">Plain white slide — the workhorse layout, with only base spacing and typography applied.</span></p>
+        <div class="code-wrap" data-lang="markdown">
+          <div class="code-head"><span class="lang">slides.md</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-p">---</span>
+<span class="tok-a">layout</span>: <span class="tok-s">default</span>
+<span class="tok-p">---</span>
+
+&lt;Header :chapter-data="{ title: '提案手法' }" chapter="method" /&gt;
+
+## 本文
+
+- 箇条書き
+- もう一つ</code></pre>
+        </div>
+      </section>
+
+      <!-- intro -->
+      <section id="layout-intro" style="padding-top:24px;">
+        <h3><code>intro</code> <span class="badge sky">Layout</span></h3>
+        <p>中央に大きな太字を配置するだけのシンプルレイアウト。章の導入や一言の引用に便利。</p>
+        <div class="preview">
+          <div class="preview-head"><span class="label">LIVE PREVIEW — layout: intro</span></div>
+          <div class="preview-body" style="text-align:center; padding:48px 20px;">
+            <div style="font-size:30px; font-weight:800; color:#0f172a;">Let's dive into the results.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- end -->
+      <section id="layout-end" style="padding-top:24px;">
+        <h3><code>end</code> <span class="badge sky">Layout</span></h3>
+        <p>「THANK YOU FOR LISTENING」を中央大見出しで出し、<code>thankYouMessage</code>, <code>contact.email</code>, <code>contact.twitter</code> を表示。背景には円/四角/ドットのゆっくりしたアニメーションが周期的に動きます。</p>
+
+        <div class="preview">
+          <div class="preview-head"><span class="label">LIVE PREVIEW — layout: end</span></div>
+          <div class="preview-body tight">
+            <div class="pv-end">
+              <div class="center"></div>
+              <div class="center2"></div>
+              <div class="tl-sq"></div>
+              <div class="pv-end-inner">
+                <div class="bar"></div>
+                <div class="ty"><span>THANK YOU</span><span class="l2">FOR LISTENING</span></div>
+                <div class="msg">ご清聴ありがとうございました</div>
+                <div class="contact"><span class="k">EMAIL</span> yamada@example.ac.jp</div>
+                <div class="contact"><span class="k">X / TWITTER</span> @yamada</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- ============== COMPONENTS ============== -->
+    <section class="doc-section" id="components">
+      <h2><span class="num">05</span> Components<span class="en-label"> / コンポーネント</span></h2>
+      <p>Slidev のグローバルコンポーネント解決により、テンプレート内で追加 import なしで使用できます。</p>
+
+      <!-- Header -->
+      <section id="c-header" style="padding-top:24px;">
+        <h3>Header</h3>
+        <p>各スライドのヘッダー部に配置し、章プログレスバー・現在位置・ページカウンターを描画します。<span class="en">Place this near the top of each content slide for a chapter/section progress bar and page counter.</span></p>
+
+        <div class="preview">
+          <div class="preview-head"><span class="label">LIVE PREVIEW — Header</span></div>
+          <div class="preview-body tight">
+            <div class="pv-header">
+              <div class="chapters">
+                <div class="chap"><div class="t">はじめに</div><div class="bar"><div class="seg done"></div><div class="seg done"></div></div></div>
+                <div class="chap"><div class="t">提案手法</div><div class="bar"><div class="seg done"></div><div class="seg cur"></div></div></div>
+                <div class="chap"><div class="t">評価</div><div class="bar"><div class="seg"></div><div class="seg"></div></div></div>
+                <div class="chap"><div class="t">まとめ</div><div class="bar"><div class="seg"></div></div></div>
+              </div>
+              <div class="title-row">
+                <div class="big-title">提案手法 — アプローチ</div>
+                <div class="counter"><div class="cur">5</div><div class="tot">24</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h4>Props</h4>
+        <table class="prop-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>chapter</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">—</td><td>現在の章のキー。<code>chapters</code> 定義のキーと一致させる</td></tr>
+            <tr><td><code>chapterData</code><span class="opt">opt</span></td><td class="type">Object</td><td class="dflt">—</td><td>章情報を直接渡す（<code>{title}</code>）。<code>chapter</code> より優先</td></tr>
+            <tr><td><code>currentSection</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">—</td><td>現在の節のキー。指定するとそのタイトルを表示し、該当セグメントを青色に</td></tr>
+            <tr><td><code>currentChapter</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">null</td><td><code>chapter</code> のエイリアス（現在位置のみ示したい時）</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Usage</h4>
+        <div class="code-wrap" data-lang="vue">
+          <div class="code-head"><span class="lang">vue</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-c">&lt;!-- 章ヘッダー（節なし） --&gt;</span>
+&lt;<span class="tok-t">Header</span> <span class="tok-a">:chapter-data</span>=<span class="tok-s">"{ title: 'はじめに' }"</span> <span class="tok-a">chapter</span>=<span class="tok-s">"intro"</span> /&gt;
+
+<span class="tok-c">&lt;!-- 節ヘッダー（節タイトル表示） --&gt;</span>
+&lt;<span class="tok-t">Header</span>
+  <span class="tok-a">chapter</span>=<span class="tok-s">"method"</span>
+  <span class="tok-a">current-section</span>=<span class="tok-s">"approach"</span> /&gt;</code></pre>
+        </div>
+
+        <div class="callout info">
+          <strong>内部ロジック:</strong> 表紙（1 枚目）を除外するために <code>adjustedCurrentPage = currentPage − 1</code>。
+          Appendix (<code>ap*</code>) にいる時はバーも Appendix 章だけの一覧に切り替わります。<code>ref</code> ページは常に「完了」扱い。
+        </div>
+      </section>
+
+      <!-- SectionTitle -->
+      <section id="c-sectiontitle" style="padding-top:24px;">
+        <h3>SectionTitle</h3>
+        <p>左側のカラーバーと巨大タイトル。スライド内の大見出しに使います。</p>
+
+        <div class="preview" data-preview="sectiontitle">
+          <div class="tweaks">
+            <label class="tweak">title: <input type="text" data-key="title" value="提案手法" /></label>
+            <label class="tweak">color:
+              <select data-key="color">
+                <option value="sky-800" selected>sky-800</option>
+                <option value="sky-600">sky-600</option>
+                <option value="indigo-700">indigo-700</option>
+                <option value="red-700">red-700</option>
+                <option value="#db2777">#db2777 (custom)</option>
+              </select>
+            </label>
+          </div>
+          <div class="preview-head"><span class="label">LIVE PREVIEW — SectionTitle</span></div>
+          <div class="preview-body">
+            <div class="pv-section-title">
+              <div class="bar" data-target="bar"></div>
+              <h2 data-target="text">提案手法</h2>
+            </div>
+          </div>
+        </div>
+
+        <h4>Props</h4>
+        <table class="prop-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>title</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">—</td><td>タイトル文字列。スロット使用時は無視</td></tr>
+            <tr><td><code>color</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">sky-800</td><td>Tailwind/UnoCSS カラー名 または 16進色</td></tr>
+          </tbody>
+        </table>
+
+        <div class="code-wrap" data-lang="vue">
+          <div class="code-head"><span class="lang">vue</span><button class="copy-btn">Copy</button></div>
+<pre><code>&lt;<span class="tok-t">SectionTitle</span> <span class="tok-a">title</span>=<span class="tok-s">"提案手法"</span> /&gt;
+&lt;<span class="tok-t">SectionTitle</span> <span class="tok-a">color</span>=<span class="tok-s">"indigo-700"</span>&gt;スロットも可&lt;/<span class="tok-t">SectionTitle</span>&gt;
+&lt;<span class="tok-t">SectionTitle</span> <span class="tok-a">title</span>=<span class="tok-s">"カスタム色"</span> <span class="tok-a">color</span>=<span class="tok-s">"#db2777"</span> /&gt;</code></pre>
+        </div>
+      </section>
+
+      <!-- SubSectionTitle -->
+      <section id="c-subsectiontitle" style="padding-top:24px;">
+        <h3>SubSectionTitle</h3>
+        <p>左に <code>lucide-chevron-right</code> アイコンを伴う中見出し。</p>
+
+        <div class="preview" data-preview="subsectiontitle">
+          <div class="tweaks">
+            <label class="tweak">title: <input type="text" data-key="title" value="2.1 モデル構造" /></label>
+            <label class="tweak">color:
+              <select data-key="color">
+                <option value="sky-700" selected>sky-700</option>
+                <option value="sky-800">sky-800</option>
+                <option value="indigo-600">indigo-600</option>
+                <option value="#059669">#059669 (custom)</option>
+              </select>
+            </label>
+          </div>
+          <div class="preview-head"><span class="label">LIVE PREVIEW — SubSectionTitle</span></div>
+          <div class="preview-body">
+            <div class="pv-subsection">
+              <div class="chev" data-target="chev">❯</div>
+              <h2 data-target="text">2.1 モデル構造</h2>
+            </div>
+          </div>
+        </div>
+
+        <table class="prop-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>title</code><span class="req">req</span></td><td class="type">String</td><td class="dflt">—</td><td>タイトル文字列</td></tr>
+            <tr><td><code>color</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">sky-700</td><td>アイコン色（Tailwind or HEX）</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- SectionDivider -->
+      <section id="c-sectiondivider" style="padding-top:24px;">
+        <h3>SectionDivider</h3>
+        <p>章の切り替わりで使う目次（TOC）ページ全体。<code>chapters</code> 定義から全章を描画し、<code>nextChapter</code> で指定した章を "NEXT" バッジ付きで強調します。Appendix 章が <code>nextChapter</code> の場合は APPENDIX 用の目次に切り替わります。</p>
+
+        <div class="preview">
+          <div class="preview-head"><span class="label">LIVE PREVIEW — SectionDivider (size=md)</span></div>
+          <div class="preview-body tight">
+            <div class="pv-divider">
+              <div class="corner-tl"></div>
+              <div class="corner-tl2"></div>
+              <div class="accent-strip"></div>
+              <div class="accent-block"></div>
+              <div class="pv-divider-inner">
+                <div class="chap"><div class="num">01</div><div class="t">はじめに</div><div class="sec">概要</div><div class="sec">目的</div></div>
+                <div class="chap next"><div class="next-badge">NEXT</div><div class="num">02</div><div class="t">提案手法</div><div class="sec">アプローチ</div><div class="sec">実装</div></div>
+                <div class="chap"><div class="num">03</div><div class="t">評価</div><div class="sec">実験設定</div><div class="sec">結果</div></div>
+                <div class="chap"><div class="num">04</div><div class="t">まとめ</div><div class="sec">考察</div><div class="sec">今後の課題</div></div>
+              </div>
+              <div class="contents-label">CONTENTS</div>
+            </div>
+          </div>
+        </div>
+
+        <h4>Props</h4>
+        <table class="prop-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>nextChapter</code><span class="req">req</span></td><td class="type">String</td><td class="dflt">—</td><td>次に入る章のキー。<code>ap*</code> を渡すと Appendix 目次モード</td></tr>
+            <tr><td><code>currentChapter</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">—</td><td>進捗表示用の現在章キー</td></tr>
+            <tr><td><code>size</code><span class="opt">opt</span></td><td class="type">'xs'|'sm'|'md'|'lg'|'xl'</td><td class="dflt">md</td><td>列数とタイポグラフィの一括制御</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Size matrix / 密度表</h4>
+        <table class="prop-table">
+          <thead><tr><th>size</th><th>columns</th><th>章番号</th><th>章タイトル</th><th>section</th></tr></thead>
+          <tbody>
+            <tr><td><code>xs</code></td><td>4</td><td>text-2xl</td><td>text-[11px]</td><td>text-[9px]</td></tr>
+            <tr><td><code>sm</code></td><td>3</td><td>text-3xl</td><td>text-xs</td><td>text-[10px]</td></tr>
+            <tr><td><code>md</code></td><td>2</td><td>text-6xl</td><td>text-2xl</td><td>text-lg</td></tr>
+            <tr><td><code>lg</code></td><td>2</td><td>text-7xl</td><td>text-xl</td><td>text-base</td></tr>
+            <tr><td><code>xl</code></td><td>1</td><td>text-8xl</td><td>text-3xl</td><td>text-xl</td></tr>
+          </tbody>
+        </table>
+
+        <div class="code-wrap" data-lang="vue">
+          <div class="code-head"><span class="lang">vue</span><button class="copy-btn">Copy</button></div>
+<pre><code>&lt;<span class="tok-t">SectionDivider</span> <span class="tok-a">next-chapter</span>=<span class="tok-s">"method"</span> <span class="tok-a">size</span>=<span class="tok-s">"md"</span> /&gt;
+&lt;<span class="tok-t">SectionDivider</span> <span class="tok-a">next-chapter</span>=<span class="tok-s">"ap1"</span> /&gt;  <span class="tok-c">&lt;!-- Appendix --&gt;</span></code></pre>
+        </div>
+      </section>
+
+      <!-- Citation -->
+      <section id="c-citation" style="padding-top:24px;">
+        <h3>Citation</h3>
+        <p>インライン引用を描画します。<code>citationStyle</code> が <code>numbered</code>（既定）なら <code>[1]</code>、<code>apa</code> なら <code>(Smith, 2023)</code> 形式。ホバー時に全書誌情報をツールチップ表示し、現在ページの引用一覧は <code>window.pageCitations</code> に登録されます。</p>
+
+        <div class="preview" data-preview="citation">
+          <div class="tweaks">
+            <label class="tweak">citationStyle:
+              <select data-key="style">
+                <option value="numbered" selected>numbered</option>
+                <option value="apa">apa</option>
+              </select>
+            </label>
+          </div>
+          <div class="preview-head"><span class="label">LIVE PREVIEW — Citation</span></div>
+          <div class="preview-body">
+            <p>この手法は<span class="pv-citation-sup" data-target="cit1" title="Smith, J., &quot;Research on AI&quot;, Journal of AI, 2023"><sup>[1]</sup></span>で提案され、<span class="pv-citation-sup" data-target="cit2" title="Jones, A., &quot;Machine Learning Basics&quot;, Tech Press, 2022"><sup>[2]</sup></span>で改良されました。</p>
+          </div>
+        </div>
+
+        <table class="prop-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>id</code><span class="req">req</span></td><td class="type">String</td><td class="dflt">—</td><td><code>citations</code> 辞書のキー</td></tr>
+          </tbody>
+        </table>
+
+        <div class="code-wrap" data-lang="markdown">
+          <div class="code-head"><span class="lang">markdown</span><button class="copy-btn">Copy</button></div>
+<pre><code>この手法は&lt;<span class="tok-t">Citation</span> <span class="tok-a">id</span>=<span class="tok-s">"smith2023"</span> /&gt;で提案されました。</code></pre>
+        </div>
+      </section>
+
+      <!-- CitationListPage -->
+      <section id="c-citationlistpage" style="padding-top:24px;">
+        <h3>CitationListPage</h3>
+        <p>参考文献一覧ページを生成。<code>Header</code> を自動で <code>chapter="ref"</code> として描画し、全エントリを学術スタイルで列挙します。</p>
+
+        <div class="preview">
+          <div class="preview-head"><span class="label">LIVE PREVIEW — CitationListPage (size=md)</span></div>
+          <div class="preview-body">
+            <div class="pv-citlist">
+              <div class="item"><div class="num">[1]</div><div class="text"><span>Smith, J. and Lee, H.</span>. "<span style="font-style:italic;">Research on AI</span>". <em>Journal of AI</em>, Vol. 42, No. 3, pp. 112–130, <span class="year">(2023)</span>.<span class="doi">DOI: 10.1000/example</span></div></div>
+              <div class="item"><div class="num">[2]</div><div class="text"><span>Jones, A.</span>. "<span style="font-style:italic;">Machine Learning Basics</span>". Tech Press, <span class="year">(2022)</span>.</div></div>
+              <div class="item"><div class="num">[3]</div><div class="text"><span>Chalapathy, R. et al.</span>. "<span style="font-style:italic;">Anomaly Detection using One-Class Neural Networks</span>". <em>arXiv preprint</em>, <span class="year">(2019)</span>.<span class="doi">URL: https://arxiv.org/abs/1802.06360</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <table class="prop-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>style</code><span class="opt">opt</span></td><td class="type">'academic'|'ieee'|'apa'</td><td class="dflt">academic</td><td>表示スタイル</td></tr>
+            <tr><td><code>sortBy</code><span class="opt">opt</span></td><td class="type">'frontmatter'|'key'|'author'|'year'</td><td class="dflt">frontmatter</td><td>並び順。<code>year</code> は降順（新しい順）</td></tr>
+            <tr><td><code>size</code><span class="opt">opt</span></td><td class="type">'xs'|'sm'|'md'|'lg'|'xl'|'2xl'</td><td class="dflt">md</td><td>文字サイズ</td></tr>
+          </tbody>
+        </table>
+
+        <div class="code-wrap" data-lang="vue">
+          <div class="code-head"><span class="lang">vue</span><button class="copy-btn">Copy</button></div>
+<pre><code>&lt;<span class="tok-t">CitationListPage</span> /&gt;
+&lt;<span class="tok-t">CitationListPage</span> <span class="tok-a">sort-by</span>=<span class="tok-s">"year"</span> <span class="tok-a">size</span>=<span class="tok-s">"lg"</span> /&gt;</code></pre>
+        </div>
+      </section>
+
+      <!-- MathText -->
+      <section id="c-mathtext" style="padding-top:24px;">
+        <h3>MathText</h3>
+        <p>テキスト中の LaTeX 数式を KaTeX でレンダリングする強力なコンポーネント。インライン <code>$...$</code> / <code>\(...\)</code>、ブロック <code>$$...$$</code> / <code>\[...\]</code>、<code>\begin{align}</code> 等の環境、および基本 Markdown（<code>**bold**</code>, <code>*em*</code>, <code>`code`</code>, <code>[link](url)</code>, 見出し, リスト, 引用, 水平線）をサポートします。</p>
+
+        <div class="preview">
+          <div class="preview-head"><span class="label">LIVE PREVIEW — MathText (KaTeX mocked)</span></div>
+          <div class="preview-body">
+            <div class="pv-math">
+              提案手法では、損失関数 <span class="inline-eq">L = (1/n) Σ (y_i − ŷ_i)²</span> を最小化します。
+              <span class="block-eq">f(x) = w·x + b &nbsp;&nbsp;&nbsp;<span class="eq-num">(1)</span></span>
+              さらに、<strong>正則化項</strong>として <span class="inline-eq">λ·‖w‖²</span> を加えます。
+            </div>
+          </div>
+        </div>
+
+        <table class="prop-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>text</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">''</td><td>表示テキスト。スロット使用時は無視</td></tr>
+            <tr><td><code>containerTag</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">span</td><td>コンテナの HTML タグ（<code>p</code>, <code>div</code> など）</td></tr>
+            <tr><td><code>containerClass</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">''</td><td>コンテナに追加するクラス</td></tr>
+            <tr><td><code>inlineMathClass</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">''</td><td>インライン数式要素に追加するクラス</td></tr>
+            <tr><td><code>blockMathClass</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">''</td><td>ブロック数式要素に追加するクラス</td></tr>
+            <tr><td><code>textClass</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">''</td><td>テキスト部分に追加するクラス</td></tr>
+            <tr><td><code>simple</code><span class="opt">opt</span></td><td class="type">Boolean</td><td class="dflt">false</td><td>KaTeX を使わず簡易スタイルのみ（軽量モード）</td></tr>
+            <tr><td><code>disableMarkdown</code><span class="opt">opt</span></td><td class="type">Boolean</td><td class="dflt">false</td><td>Markdown 処理を無効化</td></tr>
+            <tr><td><code>customDelimiters</code><span class="opt">opt</span></td><td class="type">Array</td><td class="dflt">null</td><td>数式の区切り文字定義を上書き</td></tr>
+            <tr><td><code>eq</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">null</td><td>数式番号 ID。指定すると <code>EqRef</code> から参照可能に</td></tr>
+            <tr><td><code>eqPadding</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">2.5em</td><td>数式番号の右余白</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Supported delimiters</h4>
+        <table class="prop-table">
+          <thead><tr><th>Syntax</th><th>Type</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr><td><code>\begin{align}...\end{align}</code>（align, equation, gather, multline, split 他）</td><td>block</td><td>0 (highest)</td></tr>
+            <tr><td><code>$$...$$</code></td><td>block</td><td>1</td></tr>
+            <tr><td><code>$...$</code></td><td>inline</td><td>2</td></tr>
+            <tr><td><code>\(...\)</code></td><td>inline</td><td>3</td></tr>
+            <tr><td><code>\[...\]</code></td><td>block</td><td>4</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Built-in KaTeX macros</h4>
+        <p><code>\R</code> → ℝ, <code>\N</code> → ℕ, <code>\Z</code> → ℤ, <code>\Q</code> → ℚ, <code>\C</code> → ℂ</p>
+
+        <div class="code-wrap" data-lang="vue">
+          <div class="code-head"><span class="lang">vue</span><button class="copy-btn">Copy</button></div>
+<pre><code>&lt;<span class="tok-t">MathText</span>
+  <span class="tok-a">text</span>=<span class="tok-s">"損失関数は $L = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y_i})^2$ です。"</span>
+  <span class="tok-a">container-tag</span>=<span class="tok-s">"p"</span> /&gt;
+
+<span class="tok-c">&lt;!-- 数式番号を振って EqRef から参照 --&gt;</span>
+&lt;<span class="tok-t">MathText</span> <span class="tok-a">text</span>=<span class="tok-s">"$$f(x) = wx + b$$"</span> <span class="tok-a">eq</span>=<span class="tok-s">"linear"</span> /&gt;
+ここで式 &lt;<span class="tok-t">EqRef</span> <span class="tok-a">id</span>=<span class="tok-s">"linear"</span> /&gt; は線形モデルを表します。</code></pre>
+        </div>
+
+        <div class="callout warn">
+          <strong>Simple モード:</strong> <code>:simple="true"</code> で KaTeX 読み込みをスキップし、青背景の等幅テキストとして表示されます。
+          ビルド時間短縮や低スペック PC での動作向け。
+        </div>
+      </section>
+
+      <!-- EqRef -->
+      <section id="c-eqref" style="padding-top:24px;">
+        <h3>EqRef</h3>
+        <p><code>MathText</code> で <code>eq</code> プロパティを指定した数式を参照。<code>(番号)</code> 形式でリンク風に表示します。</p>
+        <div class="preview">
+          <div class="preview-head"><span class="label">LIVE PREVIEW — EqRef</span></div>
+          <div class="preview-body">
+            <p>式 <span class="pv-eqref" title="式 (1)">(1)</span> により、線形モデルが定義されます。</p>
+          </div>
+        </div>
+        <table class="prop-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>id</code><span class="req">req</span></td><td class="type">String</td><td class="dflt">—</td><td>対応する <code>&lt;MathText eq="..."/&gt;</code> の ID</td></tr>
+          </tbody>
+        </table>
+        <div class="callout info">
+          <strong>仕組み:</strong> <code>inject('equationRegistry')</code> による番号管理。<code>MathText</code> が <code>register()</code> / <code>unregister()</code> を呼び出し、<code>EqRef</code> は <code>getNumber()</code> で参照します。<br/>
+          <span class="en">Equation numbering is managed by a shared registry injected into both components.</span>
+        </div>
+      </section>
+
+      <!-- AlertBox -->
+      <section id="c-alertbox" style="padding-top:24px;">
+        <h3>AlertBox</h3>
+        <p>左ボーダー付きの注意/情報ボックス。5 種の <code>variant</code> に応じて色・アイコンが変化します。</p>
+
+        <div class="preview" data-preview="alertbox">
+          <div class="tweaks">
+            <label class="tweak">variant:
+              <select data-key="variant">
+                <option value="warning" selected>warning</option>
+                <option value="info">info</option>
+                <option value="success">success</option>
+                <option value="error">error</option>
+                <option value="result">result</option>
+              </select>
+            </label>
+          </div>
+          <div class="preview-head"><span class="label">LIVE PREVIEW — AlertBox</span></div>
+          <div class="preview-body">
+            <div class="pv-alert warning" data-target="box">
+              <div class="ico" data-target="ico">☹</div>
+              <div class="body">従来手法では過学習が問題となっていた。</div>
+            </div>
+          </div>
+        </div>
+
+        <table class="prop-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>variant</code><span class="opt">opt</span></td><td class="type">'warning'|'info'|'success'|'error'|'result'</td><td class="dflt">warning</td><td>種類。色とアイコンが切り替わる</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Variant chart</h4>
+        <table class="prop-table">
+          <thead><tr><th>variant</th><th>アイコン（Lucide）</th><th>枠線</th><th>背景</th></tr></thead>
+          <tbody>
+            <tr><td><code>warning</code></td><td>frown</td><td>slate-600</td><td>slate-50</td></tr>
+            <tr><td><code>info</code></td><td>lightbulb</td><td>indigo-600</td><td>slate-50 → white</td></tr>
+            <tr><td><code>success</code></td><td>circle-check</td><td>green-600</td><td>green-50</td></tr>
+            <tr><td><code>error</code></td><td>circle-x</td><td>red-600</td><td>red-50</td></tr>
+            <tr><td><code>result</code></td><td>search-check</td><td>indigo-600</td><td>slate-50 → white</td></tr>
+          </tbody>
+        </table>
+
+        <div class="code-wrap" data-lang="vue">
+          <div class="code-head"><span class="lang">vue</span><button class="copy-btn">Copy</button></div>
+<pre><code>&lt;<span class="tok-t">AlertBox</span> <span class="tok-a">variant</span>=<span class="tok-s">"info"</span>&gt;本研究では〜を提案する。&lt;/<span class="tok-t">AlertBox</span>&gt;
+&lt;<span class="tok-t">AlertBox</span> <span class="tok-a">variant</span>=<span class="tok-s">"result"</span>&gt;精度が 20% 向上した。&lt;/<span class="tok-t">AlertBox</span>&gt;
+
+<span class="tok-c">&lt;!-- アイコンを独自に差し替え --&gt;</span>
+&lt;<span class="tok-t">AlertBox</span> <span class="tok-a">variant</span>=<span class="tok-s">"success"</span>&gt;
+  &lt;<span class="tok-t">template</span> <span class="tok-a">#icon</span>&gt;&lt;<span class="tok-t">lucide-star</span> /&gt;&lt;/<span class="tok-t">template</span>&gt;
+  カスタムアイコン付き。
+&lt;/<span class="tok-t">AlertBox</span>&gt;</code></pre>
+        </div>
+      </section>
+
+      <!-- HighlightText -->
+      <section id="c-highlighttext" style="padding-top:24px;">
+        <h3>HighlightText</h3>
+        <p>文中の重要語を太字 + 下線/蛍光ペン風に装飾します。</p>
+
+        <div class="preview" data-preview="highlight">
+          <div class="tweaks">
+            <label class="tweak">variant:
+              <select data-key="variant">
+                <option value="orange" selected>orange</option>
+                <option value="indigo">indigo</option>
+                <option value="red">red</option>
+                <option value="green">green</option>
+              </select>
+            </label>
+          </div>
+          <div class="preview-head"><span class="label">LIVE PREVIEW — HighlightText</span></div>
+          <div class="preview-body">
+            <p>本研究では <span class="pv-hl orange" data-target="hl">異常検知精度</span> の向上を目的とする。</p>
+          </div>
+        </div>
+
+        <table class="prop-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>variant</code><span class="opt">opt</span></td><td class="type">'orange'|'indigo'|'red'|'green'</td><td class="dflt">orange</td><td>装飾色。<code>indigo</code> のみ下線スタイル、他はボーダーボトム</td></tr>
+          </tbody>
+        </table>
+
+        <div class="code-wrap" data-lang="vue">
+          <div class="code-head"><span class="lang">vue</span><button class="copy-btn">Copy</button></div>
+<pre><code>本研究では &lt;<span class="tok-t">HighlightText</span>&gt;異常検知精度&lt;/<span class="tok-t">HighlightText</span>&gt; の向上を目指す。
+&lt;<span class="tok-t">HighlightText</span> <span class="tok-a">variant</span>=<span class="tok-s">"indigo"</span>&gt;重要語&lt;/<span class="tok-t">HighlightText</span>&gt;</code></pre>
+        </div>
+      </section>
+
+      <!-- TextColorBox -->
+      <section id="c-textcolorbox" style="padding-top:24px;">
+        <h3>TextColorBox</h3>
+        <p>上部タイトル + 下部本文のカラーボックス。タイトル背景は <code>theme-color</code>（<code>#0284c7</code>）の 30% 不透明。</p>
+
+        <div class="preview" data-preview="textcolorbox">
+          <div class="tweaks">
+            <label class="tweak">title: <input type="text" data-key="title" value="重要なポイント" /></label>
+            <label class="tweak">text: <input type="text" data-key="text" value="従来手法より 20% の性能向上を実現。" style="width:220px;" /></label>
+          </div>
+          <div class="preview-head"><span class="label">LIVE PREVIEW — TextColorBox</span></div>
+          <div class="preview-body">
+            <div class="pv-colorbox">
+              <div class="title" data-target="title">重要なポイント</div>
+              <div class="text" data-target="text">従来手法より 20% の性能向上を実現。</div>
+            </div>
+          </div>
+        </div>
+
+        <table class="prop-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>title</code><span class="req">req</span></td><td class="type">String</td><td class="dflt">—</td><td>ヘッダー文字列。HTML 可</td></tr>
+            <tr><td><code>text</code><span class="opt">opt</span></td><td class="type">String</td><td class="dflt">''</td><td>本文。<code>&lt;strong&gt;</code>, <code>&lt;em&gt;</code>, <code>&lt;span class="v-mark highlight"&gt;</code> 等が使える。スロット使用時は無視</td></tr>
+            <tr><td><code>containerClass</code><span class="opt">opt</span></td><td class="type">String|Array|Object</td><td class="dflt">''</td><td>ルート要素へのクラス</td></tr>
+            <tr><td><code>titleClass</code><span class="opt">opt</span></td><td class="type">String|Array|Object</td><td class="dflt">''</td><td>タイトル行へのクラス</td></tr>
+            <tr><td><code>textClass</code><span class="opt">opt</span></td><td class="type">String|Array|Object</td><td class="dflt">''</td><td>本文段落へのクラス</td></tr>
+          </tbody>
+        </table>
+
+        <h4>v-mark スタイル（本文中で利用可）</h4>
+        <table class="prop-table">
+          <thead><tr><th>Class</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td><code>.v-mark.underline</code></td><td>下線</td></tr>
+            <tr><td><code>.v-mark.underline.orange</code></td><td>オレンジ色の 2px 下線</td></tr>
+            <tr><td><code>.v-mark.highlight</code></td><td>黄色のマーカー</td></tr>
+            <tr><td><code>.v-mark.highlight.blue / .green / .red</code></td><td>各色のマーカー</td></tr>
+          </tbody>
+        </table>
+
+        <div class="code-wrap" data-lang="vue">
+          <div class="code-head"><span class="lang">vue</span><button class="copy-btn">Copy</button></div>
+<pre><code>&lt;<span class="tok-t">TextColorBox</span>
+  <span class="tok-a">title</span>=<span class="tok-s">"重要なポイント"</span>
+  <span class="tok-a">text</span>=<span class="tok-s">'従来手法より &lt;strong&gt;20%&lt;/strong&gt; の性能向上。'</span>
+  <span class="tok-a">container-class</span>=<span class="tok-s">"my-4"</span> /&gt;
+
+<span class="tok-c">&lt;!-- スロットで複雑コンテンツ --&gt;</span>
+&lt;<span class="tok-t">TextColorBox</span> <span class="tok-a">title</span>=<span class="tok-s">"結論"</span>&gt;
+  &lt;<span class="tok-t">ul</span>&gt;
+    &lt;<span class="tok-t">li</span>&gt;精度向上&lt;/<span class="tok-t">li</span>&gt;
+    &lt;<span class="tok-t">li</span>&gt;計算量削減&lt;/<span class="tok-t">li</span>&gt;
+  &lt;/<span class="tok-t">ul</span>&gt;
+&lt;/<span class="tok-t">TextColorBox</span>&gt;</code></pre>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- ============== BIB2SLIDEV ============== -->
+    <section class="doc-section" id="bib2slidev">
+      <h2><span class="num">06</span> bib2slidev<span class="en-label"> / BibTeX 変換ツール</span></h2>
+      <p><code>dev/bib2slidev.ipynb</code> に収録された Python 製ユーティリティ。BibTeX エントリを貼り付けて実行すると、<code>citations</code> フロントマター形式の YAML を出力します。</p>
+
+      <div class="code-wrap" data-lang="python">
+        <div class="code-head"><span class="lang">python</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-k">import</span> re
+
+<span class="tok-k">def</span> <span class="tok-t">convert_bibtex</span>(bibtex_text):
+    author = re.search(<span class="tok-s">r'author\s*=\s*\{([^}]+)\}'</span>, bibtex_text).group(<span class="tok-n">1</span>)
+    title  = re.search(<span class="tok-s">r'title\s*=\s*\{([^}]+)\}'</span>,  bibtex_text).group(<span class="tok-n">1</span>)
+    year   = re.search(<span class="tok-s">r'year\s*=\s*\{([^}]+)\}'</span>,   bibtex_text).group(<span class="tok-n">1</span>)
+    <span class="tok-c"># optional: journal, volume, number, pages, publisher, issn</span>
+    first_author = author.split(<span class="tok-s">' and '</span>)[<span class="tok-n">0</span>].strip()
+    <span class="tok-k">print</span>(<span class="tok-s">f"{first_author}:"</span>)
+    <span class="tok-k">print</span>(<span class="tok-s">f'    author : "{author}"'</span>)
+    <span class="tok-k">print</span>(<span class="tok-s">f'    title  : "{title}"'</span>)
+    <span class="tok-k">print</span>(<span class="tok-s">f'    year   : "{year}"'</span>)</code></pre>
+      </div>
+
+      <h4>Input → Output 例</h4>
+      <div class="code-wrap" data-lang="bibtex">
+        <div class="code-head"><span class="lang">bibtex (input)</span><button class="copy-btn">Copy</button></div>
+<pre><code>@misc{chalapathy2019anomaly,
+  title={Anomaly Detection using One-Class Neural Networks},
+  author={Raghavendra Chalapathy and Aditya Krishna Menon and Sanjay Chawla},
+  year={2019},
+  url={https://arxiv.org/abs/1802.06360},
+}</code></pre>
+      </div>
+      <div class="code-wrap" data-lang="yaml">
+        <div class="code-head"><span class="lang">yaml (output)</span><button class="copy-btn">Copy</button></div>
+<pre><code>Raghavendra Chalapathy:
+    author  : <span class="tok-s">"Raghavendra Chalapathy and Aditya Krishna Menon and Sanjay Chawla"</span>
+    journal : <span class="tok-s">"arXiv preprint"</span>
+    title   : <span class="tok-s">"Anomaly Detection using One-Class Neural Networks"</span>
+    year    : <span class="tok-s">"2019"</span></code></pre>
+      </div>
+
+      <div class="callout warn">
+        <strong>注意:</strong> 出力キーは「第一著者名」です。<code>Citation id="…"</code> 側と揃うよう、必要に応じてキーを <code>chalapathy2019</code> 等に書き換えてください。
+      </div>
+    </section>
+
+
+    <!-- ============== WORKFLOW ============== -->
+    <section class="doc-section" id="workflow">
+      <h2><span class="num">07</span> Recommended Workflow<span class="en-label"> / 推奨制作フロー</span></h2>
+      <ol>
+        <li><strong>章立ての設計。</strong><code>chapters</code> を先に書ききると進捗バー/目次が一貫する。</li>
+        <li><strong>参考文献の下準備。</strong>BibTeX があれば <code>bib2slidev</code> で YAML 化して <code>citations</code> に貼る。</li>
+        <li><strong>表紙と末尾。</strong><code>author</code>, <code>coAuthors</code>, <code>contact</code>, <code>thankYouMessage</code> を入れておく。</li>
+        <li><strong>本文。</strong>章ごとに <code>SectionDivider :next-chapter="..."/</code>＋<code>Header :chapter="..." :current-section="..."/</code> を敷く。</li>
+        <li><strong>推敲。</strong><code>MathText</code>, <code>Citation</code>, <code>AlertBox</code> を入れ、最後に <code>CitationListPage</code> を一枚追加。</li>
+        <li><strong>出力。</strong><code>npm run export</code> → PDF、<code>npm run screenshot</code> → PNG。</li>
+      </ol>
+    </section>
+
+
+    <!-- ============== STYLING ============== -->
+    <section class="doc-section" id="styling">
+      <h2><span class="num">08</span> Styling / UnoCSS</h2>
+      <p>テーマは UnoCSS を前提とし、<code>uno.config.ts</code> で以下のカスタムトークンを追加します。</p>
+      <ul class="kv-list">
+        <li><span class="k">text-main</span><span><code>#1f2937</code> — 既定本文色</span></li>
+        <li><span class="k">theme-color</span><span><code>#0284c7</code> — <code>TextColorBox</code> のタイトル背景等で使用</span></li>
+        <li><span class="k">fontSize.md</span><span><code>1rem</code>（UnoCSS 既定とは異なるサイズマッピング）</span></li>
+        <li><span class="k">--slidev-theme-primary</span><span><code>#5d8392</code>（CSS 変数、<code>themeConfig</code> で上書き可）</span></li>
+      </ul>
+      <h4>Shiki テーマ</h4>
+      <p>コードブロックは <code>vitesse-light</code>（light）/ <code>vitesse-dark</code>（dark）が既定。</p>
+    </section>
+
+
+    <!-- ============== TROUBLESHOOTING ============== -->
+    <section class="doc-section" id="troubleshooting">
+      <h2><span class="num">09</span> Troubleshooting<span class="en-label"> / よくあるつまずき</span></h2>
+
+      <h3>数式が描画されず原文のまま出る</h3>
+      <p>KaTeX の動的 import に失敗している可能性あり。ネットワーク切断時は <code>:simple="true"</code> でフォールバック表示に切り替えできます。<br/><span class="en">If KaTeX import fails, set <code>:simple="true"</code> to fall back to plain styled text.</span></p>
+
+      <h3>進捗バーの現在位置がずれる</h3>
+      <p><code>Header</code> は内部で <code>currentPage − 1</code>（表紙を除外）を行う前提です。表紙を複数ページ入れる構成では、<code>chapter</code> と <code>current-section</code> を明示的に渡してバーの点灯を確実にしてください。</p>
+
+      <h3>Appendix が通常目次に出てしまう</h3>
+      <p>キーが <code>ap</code> で始まっていない場合、通常章として扱われます（<code>appendix1</code> → <code>ap1</code> に変更）。</p>
+
+      <h3>引用番号が <code>[?]</code> になる</h3>
+      <p><code>Citation id="…"</code> の ID が <code>citations</code> 辞書に存在しません。スペルミスまたは <code>bib2slidev</code> 出力のキー名が想定と違う可能性あり。</p>
+
+      <h3>APA スタイルで <code>(?, year)</code> と表示される</h3>
+      <p>書誌エントリに <code>first_author</code> フィールドを追加してください。<code>author</code> とは別にテーマが要求します。</p>
+    </section>
+
+
+    <div class="foot">
+      slidev-theme-gtlabo · Specification document · rendered 2026<br/>
+      Source: <a href="https://github.com/mksmkss/slidev-theme-gtlabo">github.com/mksmkss/slidev-theme-gtlabo</a> · MIT License
+    </div>
+  </main>
+
+
+  <!-- ============ RIGHT TOC ============ -->
+  <aside class="toc">
+    <div class="toc-title">On this page</div>
+    <ul id="toc-list"></ul>
+  </aside>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,8 +1,9 @@
 <template>
-  <component 
+ <component 
     :is="containerTag"
-    :class="['math-text-container', containerClass]"
-    :style="eq ? 'position: relative; display: block;' : ''"
+    ref="containerRef"
+    :class="['math-text-container', containerClass, eq ? 'has-eq-number' : '']"
+    :style="eq ? { paddingRight: eqPadding } : {}"
   >
     <!-- スロットが使われている場合 -->
     <template v-if="hasSlotContent">
@@ -124,11 +125,17 @@ const props = defineProps({
   eq: {
     type: String,
     default: null
+  },
+    eqPadding: {
+    type: String,
+    default: '2.5em'
   }
 })
 
 // 数式レジストリ
 const equationRegistry = inject('equationRegistry', null)
+
+const containerRef = ref(null)
 
 const eqNumber = computed(() => {
   if (!props.eq || !equationRegistry) return null
@@ -413,8 +420,8 @@ const renderMathElements = async () => {
 }
 
 onMounted(() => {
-  if (props.eq && equationRegistry) {
-    equationRegistry.register(props.eq)
+  if (props.eq && equationRegistry && containerRef.value) {
+    equationRegistry.register(props.eq, containerRef.value)
   }
   renderMathElements()
 })
@@ -479,6 +486,11 @@ watch([processedTextSegments, processedSlotSegments], () => {
   background: #f0f8ff;
   padding: 1px 3px;
   border-radius: 3px;
+}
+
+.math-text-container.has-eq-number {
+  position: relative;
+  display: block;
 }
 
 .eq-number {

@@ -1,30 +1,25 @@
 <template>
   <div class="h-full flex flex-col">
-    <!-- ヘッダー部分（Headerコンポーネントを使用） -->
     <Header 
       :chapter-data="{ title: '参考文献' }"
       chapter="ref"
     />
   
-    <!-- 参考文献リスト -->
     <div class="flex-1 overflow-y-auto px-6 py-2">
       <div
         v-if="citationsList.length > 0"
-        class="space-y-3"
+        class="space-y-2"
       >
         <div 
           v-for="(citation, index) in citationsList" 
           :key="citation.key"
-          class="citation-item border-l-2 border-sky-400 pl-3 py-1"
+          class="citation-item border-l-2 border-sky-400 pl-3 py-1 flex gap-3 items-baseline"
         >
-          <!-- 引用番号（frontmatterの順番に基づく） -->
-          <div :class="numberSizeClass">
+          <div :class="numberSizeClass" class="flex-shrink-0 w-6 text-right">
             [{{ citation.number }}]
           </div>
             
-          <!-- 引用情報 -->
-          <div :class="textSizeClass">
-            <!-- 著者 -->
+          <div :class="textSizeClass" class="flex-1">
             <span
               v-if="citation.data.author"
               class="font-medium"
@@ -32,7 +27,6 @@
               {{ citation.data.author }}
             </span>
               
-            <!-- タイトル -->
             <span
               v-if="citation.data.title"
               class="italic"
@@ -41,7 +35,6 @@
               "{{ citation.data.title }}"
             </span>
               
-            <!-- 雑誌名 -->
             <span
               v-if="citation.data.journal"
               class="font-medium"
@@ -50,7 +43,6 @@
               <em>{{ citation.data.journal }}</em>
             </span>
               
-            <!-- 巻号 -->
             <span v-if="citation.data.volume">
               <span v-if="citation.data.journal">, </span>
               Vol. {{ citation.data.volume }}
@@ -62,20 +54,17 @@
               No. {{ citation.data.number }}
             </span>
               
-            <!-- ページ -->
             <span v-if="citation.data.pages">
               <span v-if="citation.data.volume || citation.data.number">, </span>
               <span v-else-if="citation.data.journal">, </span>
               pp. {{ citation.data.pages }}
             </span>
               
-            <!-- 出版社 -->
             <span v-if="citation.data.publisher">
               <span v-if="citation.data.journal || citation.data.pages">, </span>
               {{ citation.data.publisher }}
             </span>
               
-            <!-- 年 -->
             <span
               v-if="citation.data.year"
               class="font-medium"
@@ -84,46 +73,23 @@
               ({{ citation.data.year }})
             </span>
               
-            <!-- DOI -->
-            <div
-              v-if="citation.data.doi"
-              :class="linkSizeClass"
-            >
-              DOI: <a
-                :href="`https://doi.org/${citation.data.doi}`"
-                target="_blank"
-                class="hover:underline"
-              >
+            <span v-if="citation.data.doi" :class="linkSizeClass">
+              DOI: 
+              <a :href="`https://doi.org/${citation.data.doi}`" target="_blank" class="hover:underline">
                 {{ citation.data.doi }}
               </a>
-            </div>
-              
-            <!-- URL -->
-            <div
-              v-if="citation.data.url && !citation.data.doi"
-              :class="linkSizeClass"
-            >
-              URL: <a
-                :href="citation.data.url"
-                target="_blank"
-                class="hover:underline break-all"
-              >
-                {{ citation.data.url }}
-              </a>
-            </div>
-              
-            <!-- ISSN -->
-            <div
-              v-if="citation.data.issn"
-              :class="linkSizeClass"
-            >
+            </span>
+            <span v-if="citation.data.url && !citation.data.doi" :class="linkSizeClass">
+              URL:
+              <a :href="citation.data.url" target="_blank" class="hover:underline break-all">{{ citation.data.url }}</a>
+            </span>
+            <span v-if="citation.data.issn" :class="linkSizeClass">
               ISSN: {{ citation.data.issn }}
-            </div>
+            </span>
           </div>
         </div>
       </div>
         
-      <!-- 参考文献がない場合 -->
       <div
         v-else
         class="text-center text-gray-500 mt-12"
@@ -137,7 +103,6 @@
       </div>
     </div>
       
-    <!-- フッター（必要に応じて） -->
     <div class="flex-shrink-0 mt-4 pt-2 border-t border-gray-300 px-6">
       <div :class="footerSizeClass">
         {{ citationsList.length }} 件の参考文献
@@ -145,7 +110,7 @@
     </div>
   </div>
 </template>
-  
+
 <script setup>
 import { computed, inject } from 'vue'
 import { useSlideContext } from '@slidev/client'
@@ -256,6 +221,12 @@ const sizeMap = {
     text: 'text-base text-gray-700 leading-relaxed',
     link: 'mt-1.5 text-base text-blue-600',
     footer: 'text-base text-gray-600 text-center'
+  },
+  "2xl": {
+    number: 'text-xl font-semibold text-sky-700 mb-2',
+    text: 'text-lg text-gray-700 leading-relaxed',
+    link: 'mt-2 text-lg text-blue-600',
+    footer: 'text-lg text-gray-600 text-center'
   }
 }
 

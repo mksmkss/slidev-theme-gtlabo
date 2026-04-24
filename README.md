@@ -4,7 +4,7 @@
 
 学術発表やプレゼンテーション用に設計されたSlidev用カスタムテーマ。引用管理、数式表示、階層リストなどの機能を提供します。
 
-## Install
+## Installation
 
 ```bash
 npm install slidev-theme-gtlabo

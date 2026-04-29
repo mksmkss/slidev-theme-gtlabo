@@ -18,7 +18,7 @@
       <div class="brand-mark"></div>
       <div>
         <div class="brand-title">slidev-theme<br/>-gtlabo</div>
-        <div class="brand-sub">SPEC · v2.3.1</div>
+        <div class="brand-sub">SPEC · v2.3.2</div>
       </div>
     </div>
 
@@ -96,7 +96,7 @@
       <div class="hero-row">
         <span class="tag">NPM · slidev-theme-gtlabo</span>
         <span class="dot">●</span>
-        <span>v2.3.1</span>
+        <span>v2.3.2</span>
         <span class="dot">●</span>
         <span>MIT License</span>
         <span class="dot">●</span>
@@ -196,6 +196,11 @@ yarn add slidev-theme-gtlabo</code></pre>
 <span class="tok-p">---</span></code></pre>
       </div>
 
+      <div class="callout warn">
+        <strong>外部 YAML を使う場合:</strong> <code>data/chapters.yaml</code> / <code>data/citations.yaml</code> に切り出すだけでは <code>Header</code> / <code>Citation</code> / <code>CitationListPage</code> / <code>EqRef</code> から参照できません。
+        スライドプロジェクト側に <code>setup/main.ts</code> を作成し、<code>defineAppSetup()</code> で <code>chapters</code> / <code>citations</code> / <code>equationRegistry</code> を provide してください。
+      </div>
+
       <div class="callout tip">
         <strong>ローカル開発:</strong> <code>npm run dev</code> で <code>example.md</code> のプレビュー、<code>npm run export</code> で PDF 出力、<code>npm run screenshot</code> で PNG 出力ができます。
       </div>
@@ -221,6 +226,74 @@ yarn add slidev-theme-gtlabo</code></pre>
         <li><span class="k">contact</span><span><code>{email, twitter}</code>。end レイアウトに表示</span></li>
       </ul>
 
+      <div class="callout info">
+        <strong><code>setup/main.ts</code> が必要なケース:</strong>
+        <code>chapters</code> と <code>citations</code> を frontmatter に直接書く場合はそのまま動作します。
+        一方で <code>data/chapters.yaml</code> / <code>data/citations.yaml</code> に外出ししてテーマコンポーネント全体で共有したい場合は、<code>setup/main.ts</code> で import と <code>provide()</code> を行ってください。
+      </div>
+
+      <div class="code-wrap" data-lang="text">
+        <div class="code-head"><span class="lang">project layout</span><button class="copy-btn">Copy</button></div>
+<pre><code>my-slides/
+├─ slides.md
+├─ data/
+│  ├─ chapters.yaml
+│  └─ citations.yaml
+├─ setup/
+│  └─ main.ts          <span class="tok-c"># ← YAML を provide する</span>
+├─ components/
+└─ package.json</code></pre>
+      </div>
+
+      <div class="code-wrap" data-lang="ts">
+        <div class="code-head"><span class="lang">setup/main.ts</span><button class="copy-btn">Copy</button></div>
+<pre><code><span class="tok-k">import</span> { <span class="tok-t">defineAppSetup</span> } <span class="tok-k">from</span> <span class="tok-s">'@slidev/types'</span>
+<span class="tok-k">import</span> { <span class="tok-t">reactive</span> } <span class="tok-k">from</span> <span class="tok-s">'vue'</span>
+<span class="tok-k">import</span> <span class="tok-v">chapters</span> <span class="tok-k">from</span> <span class="tok-s">'../data/chapters.yaml'</span>
+<span class="tok-k">import</span> <span class="tok-v">citations</span> <span class="tok-k">from</span> <span class="tok-s">'../data/citations.yaml'</span>
+
+<span class="tok-k">export default</span> <span class="tok-f">defineAppSetup</span>(({ <span class="tok-v">app</span> }) =&gt; {
+  <span class="tok-c">// グローバルプロパティとして注入</span>
+  <span class="tok-v">app</span>.<span class="tok-v">config</span>.<span class="tok-v">globalProperties</span>.<span class="tok-v">$chapters</span> = <span class="tok-v">chapters</span>
+  <span class="tok-v">app</span>.<span class="tok-v">config</span>.<span class="tok-v">globalProperties</span>.<span class="tok-v">$citations</span> = <span class="tok-v">citations</span>
+
+  <span class="tok-c">// provide/inject 用にも提供</span>
+  <span class="tok-v">app</span>.<span class="tok-f">provide</span>(<span class="tok-s">'chapters'</span>, <span class="tok-v">chapters</span>)
+  <span class="tok-v">app</span>.<span class="tok-f">provide</span>(<span class="tok-s">'citations'</span>, <span class="tok-v">citations</span>)
+
+  <span class="tok-c">// 数式レジストリ</span>
+  <span class="tok-k">const</span> <span class="tok-v">equationRegistry</span> = <span class="tok-f">reactive</span>({
+    <span class="tok-v">ids</span>: [] <span class="tok-k">as</span> <span class="tok-t">string</span>[],
+    <span class="tok-v">elements</span>: {} <span class="tok-k">as</span> <span class="tok-t">Record</span>&lt;<span class="tok-t">string</span>, <span class="tok-t">Element</span>&gt;,
+
+    <span class="tok-f">register</span>(<span class="tok-v">id</span>: <span class="tok-t">string</span>, <span class="tok-v">el</span>: <span class="tok-t">Element</span>) {
+      <span class="tok-k">if</span> (!<span class="tok-k">this</span>.<span class="tok-v">ids</span>.<span class="tok-f">includes</span>(<span class="tok-v">id</span>)) <span class="tok-k">this</span>.<span class="tok-v">ids</span>.<span class="tok-f">push</span>(<span class="tok-v">id</span>)
+      <span class="tok-k">this</span>.<span class="tok-v">elements</span>[<span class="tok-v">id</span>] = <span class="tok-v">el</span>
+    },
+
+    <span class="tok-f">unregister</span>(<span class="tok-v">id</span>: <span class="tok-t">string</span>) {
+      <span class="tok-k">this</span>.<span class="tok-v">ids</span> = <span class="tok-k">this</span>.<span class="tok-v">ids</span>.<span class="tok-f">filter</span>(<span class="tok-v">i</span> =&gt; <span class="tok-v">i</span> !== <span class="tok-v">id</span>)
+      <span class="tok-k">delete</span> <span class="tok-k">this</span>.<span class="tok-v">elements</span>[<span class="tok-v">id</span>]
+    },
+
+    <span class="tok-f">getNumber</span>(<span class="tok-v">id</span>: <span class="tok-t">string</span>): <span class="tok-t">number</span> | <span class="tok-t">null</span> {
+      <span class="tok-k">if</span> (!(<span class="tok-v">id</span> <span class="tok-k">in</span> <span class="tok-k">this</span>.<span class="tok-v">elements</span>)) <span class="tok-k">return</span> <span class="tok-t">null</span>
+      <span class="tok-k">const</span> <span class="tok-v">sorted</span> = [...<span class="tok-k">this</span>.<span class="tok-v">ids</span>].<span class="tok-f">sort</span>((<span class="tok-v">a</span>, <span class="tok-v">b</span>) =&gt; {
+        <span class="tok-k">const</span> <span class="tok-v">elA</span> = <span class="tok-k">this</span>.<span class="tok-v">elements</span>[<span class="tok-v">a</span>]
+        <span class="tok-k">const</span> <span class="tok-v">elB</span> = <span class="tok-k">this</span>.<span class="tok-v">elements</span>[<span class="tok-v">b</span>]
+        <span class="tok-k">if</span> (!<span class="tok-v">elA</span> || !<span class="tok-v">elB</span>) <span class="tok-k">return</span> <span class="tok-m">0</span>
+        <span class="tok-k">const</span> <span class="tok-v">pos</span> = <span class="tok-v">elA</span>.<span class="tok-f">compareDocumentPosition</span>(<span class="tok-v">elB</span>)
+        <span class="tok-k">return</span> <span class="tok-v">pos</span> &amp; <span class="tok-v">Node</span>.<span class="tok-v">DOCUMENT_POSITION_FOLLOWING</span> ? <span class="tok-m">-1</span> : <span class="tok-m">1</span>
+      })
+      <span class="tok-k">const</span> <span class="tok-v">index</span> = <span class="tok-v">sorted</span>.<span class="tok-f">indexOf</span>(<span class="tok-v">id</span>)
+      <span class="tok-k">return</span> <span class="tok-v">index</span> &gt;= <span class="tok-m">0</span> ? <span class="tok-v">index</span> + <span class="tok-m">1</span> : <span class="tok-t">null</span>
+    },
+  })
+
+  <span class="tok-v">app</span>.<span class="tok-f">provide</span>(<span class="tok-s">'equationRegistry'</span>, <span class="tok-v">equationRegistry</span>)
+})</code></pre>
+      </div>
+
       <!-- Chapters -->
       <h3 id="chapters-config">3.1 <code>chapters</code> / 章・節構造</h3>
       <p>進捗バー (<code>Header</code>) と目次 (<code>SectionDivider</code>) が共有するデータ構造です。<code>ref</code> キーは参考文献ページ専用で進捗バーから除外されます。<code>ap</code> で始まるキーは <strong>付録（Appendix）</strong> として扱われ、通常章とは別のグループで描画されます。</p>
@@ -228,9 +301,9 @@ yarn add slidev-theme-gtlabo</code></pre>
       <div class="callout info">
         <strong>推奨配置 / Recommended location:</strong>
         章構造は <code>slides.md</code> の frontmatter に直接書くのではなく、<strong>スライドプロジェクト直下に <code>data/chapters.yaml</code> を作成してそちらに記述</strong>することを推奨します（<code>data/citations.yaml</code> と同様）。
-        <code>slides.md</code> の frontmatter では <code>chapters: !include data/chapters.yaml</code> のように外部参照するか、ビルド前に結合します。
+        <code>slides.md</code> の frontmatter では <code>chapters: !include data/chapters.yaml</code> のように外部参照するか、ビルド前に結合しつつ、<code>setup/main.ts</code> で <code>chapters</code> を import して <code>app.provide('chapters', chapters)</code> を行ってください。
         章立ての改訂と本文編集の差分を分離でき、複数スライド間で章テンプレートを使い回すのも容易になります。<br/>
-        <span class="en">Keep the chapter structure in <code>data/chapters.yaml</code> at the root of your slide project rather than inline in the frontmatter — this isolates structural changes from content edits and makes chapter templates reusable across decks.</span>
+        <span class="en">Keep the chapter structure in <code>data/chapters.yaml</code> at the root of your slide project rather than inline in the frontmatter, and provide it from <code>setup/main.ts</code> so the theme components can consume a shared source of truth.</span>
       </div>
 
       <div class="code-wrap" data-lang="text">
@@ -240,6 +313,8 @@ yarn add slidev-theme-gtlabo</code></pre>
 ├─ data/
 │  ├─ chapters.yaml      <span class="tok-c"># ← 章・節構造はここに</span>
 │  └─ citations.yaml     <span class="tok-c"># ← 参考文献はここに</span>
+├─ setup/
+│  └─ main.ts            <span class="tok-c"># ← chapters / citations を provide</span>
 ├─ components/
 └─ package.json</code></pre>
       </div>
@@ -285,9 +360,9 @@ yarn add slidev-theme-gtlabo</code></pre>
       <div class="callout info">
         <strong>推奨配置 / Recommended location:</strong>
         参考文献は <code>slides.md</code> の frontmatter に直接書くのではなく、<strong>スライドプロジェクト直下に <code>data/citations.yaml</code> を作成してそちらに記述</strong>することを推奨します。
-        <code>slides.md</code> の frontmatter では <code>citations: !include data/citations.yaml</code> のように外部参照するか、ビルド前に結合します。
+        <code>slides.md</code> の frontmatter では <code>citations: !include data/citations.yaml</code> のように外部参照するか、ビルド前に結合しつつ、<code>setup/main.ts</code> で <code>citations</code> を import して <code>app.provide('citations', citations)</code> を行ってください。
         これにより <code>bib2slidev</code> で生成した YAML をそのまま貼れて、スライド本体の差分と参考文献の差分を分離できます。<br/>
-        <span class="en">Put your bibliography in <code>data/citations.yaml</code> at the root of your slide project rather than inline in the frontmatter — this keeps <code>slides.md</code> diffs focused on content and lets you paste <code>bib2slidev</code> output directly into a dedicated file.</span>
+        <span class="en">Put your bibliography in <code>data/citations.yaml</code> at the root of your slide project rather than inline in the frontmatter, and provide it from <code>setup/main.ts</code> so citations resolve consistently across the deck.</span>
       </div>
 
       <div class="code-wrap" data-lang="text">
@@ -296,6 +371,8 @@ yarn add slidev-theme-gtlabo</code></pre>
 ├─ slides.md
 ├─ data/
 │  └─ citations.yaml     <span class="tok-c"># ← 参考文献はここに集約</span>
+├─ setup/
+│  └─ main.ts            <span class="tok-c"># ← citations と equationRegistry を provide</span>
 ├─ components/
 └─ package.json</code></pre>
       </div>
@@ -1071,6 +1148,9 @@ yarn add slidev-theme-gtlabo</code></pre>
 
       <h3>引用番号が <code>[?]</code> になる</h3>
       <p><code>Citation id="…"</code> の ID が <code>citations</code> 辞書に存在しません。スペルミスまたは <code>bib2slidev</code> 出力のキー名が想定と違う可能性あり。</p>
+
+      <h3>外部 YAML を置いたのに <code>Header</code> / <code>Citation</code> / <code>EqRef</code> が反映されない</h3>
+      <p><code>data/chapters.yaml</code> / <code>data/citations.yaml</code> を作っただけでは不十分です。<code>setup/main.ts</code> を配置し、<code>../data/chapters.yaml</code> と <code>../data/citations.yaml</code> の import path、および <code>app.provide('chapters', ...)</code> / <code>app.provide('citations', ...)</code> / <code>app.provide('equationRegistry', ...)</code> を確認してください。</p>
 
       <h3>APA スタイルで <code>(?, year)</code> と表示される</h3>
       <p>書誌エントリに <code>first_author</code> フィールドを追加してください。<code>author</code> とは別にテーマが要求します。</p>
